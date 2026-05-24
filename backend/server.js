@@ -32,8 +32,9 @@ socketHandler(io);
 app.use(
   cors({
     origin: [
-      "https://cabbookingdemo-bo7u.vercel.app/",
-      "https://cabbookingdemo.vercel.app/"
+      "http://localhost:5173",
+      "https://cabbookingdemo-bo7u.vercel.app",
+      "https://cabbookingdemo.vercel.app",
     ],
     credentials: true,
   })
@@ -56,7 +57,7 @@ app.get("/", (req, res) => {
   res.send("API Running");
 });
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5007;
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
