@@ -12,18 +12,17 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 // DRIVER ICON (BLUE)
-const driverIcon =
-  new L.Icon({
-    iconUrl:
-      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png",
+const driverIcon = new L.Icon({
+  iconUrl:
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png",
 
-    shadowUrl:
-      "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  shadowUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 
-    iconSize: [25, 41],
+  iconSize: [25, 41],
 
-    iconAnchor: [12, 41],
-  });
+  iconAnchor: [12, 41],
+});
 
 // CUSTOMER PICKUP ICON (GREEN)
 const customerIcon =
@@ -53,20 +52,19 @@ const destinationIcon =
     iconAnchor: [12, 41],
   });
 
+// CLICK TO MOVE DRIVER
 function DriverLocationSelector({
   setDriverLocation,
 }) {
-
   useMapEvents({
-
     click(e) {
-
       const lat =
         e.latlng.lat;
 
       const lng =
         e.latlng.lng;
 
+      // FIXED
       setDriverLocation(
         lat,
         lng
@@ -83,122 +81,109 @@ function DriverMap({
   destinationLocation,
   setDriverLocation,
 }) {
+  const center =
+    driverLocation ||
+    customerLocation || [
+      27.1,
+      93.6,
+    ];
 
   return (
-
-    <MapContainer
-      center={
-        driverLocation ||
-        customerLocation || [
-          27.1,
-          93.6,
-        ]
-      }
-
-      zoom={13}
-
+    <div
       style={{
-        height: "500px",
         width: "100%",
-        borderRadius:
-          "10px",
+        height: "100%",
       }}
     >
-
-      <TileLayer
-        attribution="&copy; OpenStreetMap contributors"
-
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-
-      {/* CLICK TO MOVE DRIVER */}
-      <DriverLocationSelector
-        setDriverLocation={
-          setDriverLocation
-        }
-      />
-
-      {/* DRIVER */}
-      {driverLocation && (
-
-        <Marker
-          position={
-            driverLocation
-          }
-
-          icon={driverIcon}
-        >
-
-          <Popup>
-            Driver Location
-          </Popup>
-
-        </Marker>
-      )}
-
-      {/* CUSTOMER PICKUP */}
-      {customerLocation && (
-
-        <Marker
-          position={
-            customerLocation
-          }
-
-          icon={customerIcon}
-        >
-
-          <Popup>
-            Customer Pickup
-          </Popup>
-
-        </Marker>
-      )}
-
-      {/* CUSTOMER DESTINATION */}
-      {destinationLocation && (
-
-        <Marker
-          position={
-            destinationLocation
-          }
-
-          icon={
-            destinationIcon
-          }
-        >
-
-          <Popup>
-            Customer Destination
-          </Popup>
-
-        </Marker>
-      )}
-
-      {/* DRIVER TO CUSTOMER */}
-      {driverLocation &&
-        customerLocation && (
-
-        <Polyline
-          positions={[
-            driverLocation,
-            customerLocation,
-          ]}
+      <MapContainer
+        center={center}
+        zoom={13}
+        scrollWheelZoom={true}
+        style={{
+          width: "100%",
+          height: "100%",
+          minHeight: "400px",
+        }}
+      >
+        <TileLayer
+          attribution="&copy; OpenStreetMap contributors"
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-      )}
 
-      {/* CUSTOMER TO DESTINATION */}
-      {customerLocation &&
-        destinationLocation && (
-
-        <Polyline
-          positions={[
-            customerLocation,
-            destinationLocation,
-          ]}
+        {/* CLICK TO MOVE DRIVER */}
+        <DriverLocationSelector
+          setDriverLocation={
+            setDriverLocation
+          }
         />
-      )}
 
-    </MapContainer>
+        {/* DRIVER */}
+        {driverLocation && (
+          <Marker
+            position={
+              driverLocation
+            }
+            icon={driverIcon}
+          >
+            <Popup>
+              Driver Location
+            </Popup>
+          </Marker>
+        )}
+
+        {/* CUSTOMER PICKUP */}
+        {customerLocation && (
+          <Marker
+            position={
+              customerLocation
+            }
+            icon={customerIcon}
+          >
+            <Popup>
+              Customer Pickup
+            </Popup>
+          </Marker>
+        )}
+
+        {/* CUSTOMER DESTINATION */}
+        {destinationLocation && (
+          <Marker
+            position={
+              destinationLocation
+            }
+            icon={
+              destinationIcon
+            }
+          >
+            <Popup>
+              Customer Destination
+            </Popup>
+          </Marker>
+        )}
+
+        {/* DRIVER TO CUSTOMER */}
+        {driverLocation &&
+          customerLocation && (
+            <Polyline
+              positions={[
+                driverLocation,
+                customerLocation,
+              ]}
+            />
+          )}
+
+        {/* CUSTOMER TO DESTINATION */}
+        {customerLocation &&
+          destinationLocation && (
+            <Polyline
+              positions={[
+                customerLocation,
+                destinationLocation,
+              ]}
+            />
+          )}
+      </MapContainer>
+    </div>
   );
 }
 

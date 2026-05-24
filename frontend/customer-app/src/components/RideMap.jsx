@@ -26,18 +26,17 @@ const pickupIcon = new L.Icon({
 });
 
 // RED DESTINATION ICON
-const destinationIcon =
-  new L.Icon({
-    iconUrl:
-      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
+const destinationIcon = new L.Icon({
+  iconUrl:
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
 
-    shadowUrl:
-      "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  shadowUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 
-    iconSize: [25, 41],
+  iconSize: [25, 41],
 
-    iconAnchor: [12, 41],
-  });
+  iconAnchor: [12, 41],
+});
 
 // BLUE DRIVER ICON
 const driverIcon = new L.Icon({
@@ -53,10 +52,7 @@ const driverIcon = new L.Icon({
 });
 
 // AUTO CENTER MAP
-function ChangeMapView({
-  center,
-}) {
-
+function ChangeMapView({ center }) {
   const map = useMap();
 
   map.setView(center);
@@ -69,46 +65,30 @@ function DestinationSelector({
   setDestinationLocation,
   setDestination,
 }) {
-
   useMapEvents({
-
     async click(e) {
+      const lat = e.latlng.lat;
 
-      const lat =
-        e.latlng.lat;
+      const lng = e.latlng.lng;
 
-      const lng =
-        e.latlng.lng;
-
-      // SAVE COORDINATES
       setDestinationLocation({
         lat,
         lng,
       });
 
       try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+        );
 
-        // REVERSE GEOCODING
-        const response =
-          await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
-          );
+        const data = await response.json();
 
-        const data =
-          await response.json();
-
-        if (
-          data?.display_name
-        ) {
-
-          // AUTO FILL DESTINATION INPUT
+        if (data?.display_name) {
           setDestination(
             data.display_name
           );
         }
-
       } catch (error) {
-
         console.log(error);
       }
     },
@@ -124,132 +104,116 @@ function RideMap({
   setDestination,
   driverLocation,
 }) {
-
   if (!customerLocation) {
-
     return (
-      <h2>
+      <div
+        style={{
+          height: "100%",
+          minHeight: "400px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "18px",
+          fontWeight: "600",
+        }}
+      >
         Loading Map...
-      </h2>
+      </div>
     );
   }
 
   return (
-
-    <MapContainer
-      center={
-        customerLocation
-      }
-
-      zoom={13}
-
+    <div
       style={{
-        height: "500px",
         width: "100%",
-        borderRadius:
-          "10px",
+        height: "100%",
       }}
     >
-
-      <ChangeMapView
-        center={
-          customerLocation
-        }
-      />
-
-      {/* CLICK HANDLER */}
-      <DestinationSelector
-        setDestinationLocation={
-          setDestinationLocation
-        }
-
-        setDestination={
-          setDestination
-        }
-      />
-
-      <TileLayer
-        attribution="&copy; OpenStreetMap contributors"
-
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-
-      {/* CUSTOMER */}
-      <Marker
-        position={
-          customerLocation
-        }
-
-        icon={pickupIcon}
+      <MapContainer
+        center={customerLocation}
+        zoom={13}
+        scrollWheelZoom={true}
+        style={{
+          width: "100%",
+          height: "100%",
+          minHeight: "400px",
+        }}
       >
-
-        <Popup>
-          Pickup Location
-        </Popup>
-
-      </Marker>
-
-      {/* DESTINATION */}
-      {destinationLocation && (
-
-        <Marker
-          position={
-            destinationLocation
-          }
-
-          icon={
-            destinationIcon
-          }
-        >
-
-          <Popup>
-            Destination
-          </Popup>
-
-        </Marker>
-      )}
-
-      {/* DRIVER */}
-      {driverLocation && (
-
-        <Marker
-          position={
-            driverLocation
-          }
-
-          icon={driverIcon}
-        >
-
-          <Popup>
-            Driver Location
-          </Popup>
-
-        </Marker>
-      )}
-
-      {/* DRIVER TO CUSTOMER */}
-      {driverLocation && (
-
-        <Polyline
-          positions={[
-            driverLocation,
-            customerLocation,
-          ]}
+        <ChangeMapView
+          center={customerLocation}
         />
-      )}
 
-      {/* CUSTOMER TO DESTINATION */}
-      {destinationLocation && (
-
-        <Polyline
-          positions={[
-            customerLocation,
-            destinationLocation,
-          ]}
+        <DestinationSelector
+          setDestinationLocation={
+            setDestinationLocation
+          }
+          setDestination={
+            setDestination
+          }
         />
-      )}
 
-    </MapContainer>
+        <TileLayer
+          attribution="&copy; OpenStreetMap contributors"
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+
+        {/* CUSTOMER */}
+        <Marker
+          position={customerLocation}
+          icon={pickupIcon}
+        >
+          <Popup>
+            Pickup Location
+          </Popup>
+        </Marker>
+
+        {/* DESTINATION */}
+        {destinationLocation && (
+          <Marker
+            position={
+              destinationLocation
+            }
+            icon={destinationIcon}
+          >
+            <Popup>
+              Destination
+            </Popup>
+          </Marker>
+        )}
+
+        {/* DRIVER */}
+        {driverLocation && (
+          <Marker
+            position={driverLocation}
+            icon={driverIcon}
+          >
+            <Popup>
+              Driver Location
+            </Popup>
+          </Marker>
+        )}
+
+        {/* DRIVER TO CUSTOMER */}
+        {driverLocation && (
+          <Polyline
+            positions={[
+              driverLocation,
+              customerLocation,
+            ]}
+          />
+        )}
+
+        {/* CUSTOMER TO DESTINATION */}
+        {destinationLocation && (
+          <Polyline
+            positions={[
+              customerLocation,
+              destinationLocation,
+            ]}
+          />
+        )}
+      </MapContainer>
+    </div>
   );
 }
 
