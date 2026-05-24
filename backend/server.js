@@ -29,7 +29,15 @@ const io = new Server(server, {
 
 socketHandler(io);
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "https://cabbookingdemo-bo7u.vercel.app/",
+      "https://cabbookingdemo.vercel.app/"
+    ],
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 
@@ -48,7 +56,7 @@ app.get("/", (req, res) => {
   res.send("API Running");
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
