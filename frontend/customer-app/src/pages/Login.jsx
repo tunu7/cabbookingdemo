@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+
 import API from "../utils/axios";
 
 function Login() {
@@ -26,12 +27,29 @@ function Login() {
         formData
       );
 
-      localStorage.setItem("token", res.data.token);
+      localStorage.setItem(
+        "token",
+        res.data.token
+      );
+
+      localStorage.setItem(
+        "customer",
+        JSON.stringify(res.data.customer)
+      );
+
+      alert("Login Successful");
 
       navigate("/dashboard");
     } catch (error) {
-      console.log(error);
-      alert("Login Failed");
+      console.log(
+        "Login Error:",
+        error.response?.data
+      );
+
+      alert(
+        error.response?.data?.message ||
+          "Login Failed"
+      );
     }
   };
 
@@ -53,23 +71,31 @@ function Login() {
           width: "300px",
         }}
       >
-        <h1>Login</h1>
+        <h1>Customer Login</h1>
 
         <input
           type="email"
           name="email"
           placeholder="Email"
+          value={formData.email}
           onChange={handleChange}
+          autoComplete="email"
+          required
         />
 
         <input
           type="password"
           name="password"
           placeholder="Password"
+          value={formData.password}
           onChange={handleChange}
+          autoComplete="current-password"
+          required
         />
 
-        <button type="submit">Login</button>
+        <button type="submit">
+          Login
+        </button>
 
         <Link to="/register">
           Create account
