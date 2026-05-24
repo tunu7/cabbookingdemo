@@ -8,6 +8,9 @@ import RideMap from "../components/RideMap";
 
 function Dashboard() {
 
+  const [bookingLoading, setBookingLoading] =
+    useState(false);
+
   const [pickup, setPickup] =
     useState("");
 
@@ -288,6 +291,10 @@ function Dashboard() {
 
       try {
 
+        setBookingLoading(
+          true
+        );
+
         // PICKUP COORDINATES
         const pickupCoords =
           await getCoordinates(
@@ -307,6 +314,10 @@ function Dashboard() {
 
           alert(
             "Location not found"
+          );
+
+          setBookingLoading(
+            false
           );
 
           return;
@@ -347,6 +358,12 @@ function Dashboard() {
 
         alert(
           "Booking Failed"
+        );
+
+      } finally {
+
+        setBookingLoading(
+          false
         );
       }
     };
@@ -424,19 +441,40 @@ function Dashboard() {
           onClick={
             bookRide
           }
+
+          disabled={ride}
+
           style={{
             padding:
               "10px 20px",
 
             cursor:
-              "pointer",
+              ride
+                ? "not-allowed"
+                : "pointer",
 
             marginBottom:
               "20px",
+
+            backgroundColor:
+              ride
+                ? "green"
+                : "black",
+
+            color: "white",
+
+            border: "none",
+
+            borderRadius:
+              "5px",
           }}
         >
 
-          Book Ride
+          {bookingLoading
+            ? "Booking..."
+            : ride
+            ? "Booked"
+            : "Book Ride"}
 
         </button>
 

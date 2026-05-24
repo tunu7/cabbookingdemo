@@ -7,6 +7,52 @@ import {
   useMapEvents,
 } from "react-leaflet";
 
+import L from "leaflet";
+
+import "leaflet/dist/leaflet.css";
+
+// DRIVER ICON (BLUE)
+const driverIcon =
+  new L.Icon({
+    iconUrl:
+      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png",
+
+    shadowUrl:
+      "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+
+    iconSize: [25, 41],
+
+    iconAnchor: [12, 41],
+  });
+
+// CUSTOMER PICKUP ICON (GREEN)
+const customerIcon =
+  new L.Icon({
+    iconUrl:
+      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
+
+    shadowUrl:
+      "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+
+    iconSize: [25, 41],
+
+    iconAnchor: [12, 41],
+  });
+
+// DESTINATION ICON (RED)
+const destinationIcon =
+  new L.Icon({
+    iconUrl:
+      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
+
+    shadowUrl:
+      "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+
+    iconSize: [25, 41],
+
+    iconAnchor: [12, 41],
+  });
+
 function DriverLocationSelector({
   setDriverLocation,
 }) {
@@ -34,6 +80,7 @@ function DriverLocationSelector({
 function DriverMap({
   driverLocation,
   customerLocation,
+  destinationLocation,
   setDriverLocation,
 }) {
 
@@ -53,11 +100,14 @@ function DriverMap({
       style={{
         height: "500px",
         width: "100%",
+        borderRadius:
+          "10px",
       }}
     >
 
       <TileLayer
         attribution="&copy; OpenStreetMap contributors"
+
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
@@ -75,6 +125,8 @@ function DriverMap({
           position={
             driverLocation
           }
+
+          icon={driverIcon}
         >
 
           <Popup>
@@ -84,13 +136,15 @@ function DriverMap({
         </Marker>
       )}
 
-      {/* CUSTOMER */}
+      {/* CUSTOMER PICKUP */}
       {customerLocation && (
 
         <Marker
           position={
             customerLocation
           }
+
+          icon={customerIcon}
         >
 
           <Popup>
@@ -100,7 +154,27 @@ function DriverMap({
         </Marker>
       )}
 
-      {/* ROUTE */}
+      {/* CUSTOMER DESTINATION */}
+      {destinationLocation && (
+
+        <Marker
+          position={
+            destinationLocation
+          }
+
+          icon={
+            destinationIcon
+          }
+        >
+
+          <Popup>
+            Customer Destination
+          </Popup>
+
+        </Marker>
+      )}
+
+      {/* DRIVER TO CUSTOMER */}
       {driverLocation &&
         customerLocation && (
 
@@ -108,6 +182,18 @@ function DriverMap({
           positions={[
             driverLocation,
             customerLocation,
+          ]}
+        />
+      )}
+
+      {/* CUSTOMER TO DESTINATION */}
+      {customerLocation &&
+        destinationLocation && (
+
+        <Polyline
+          positions={[
+            customerLocation,
+            destinationLocation,
           ]}
         />
       )}

@@ -8,12 +8,55 @@ import {
   useMapEvents,
 } from "react-leaflet";
 
+import L from "leaflet";
+
 import "leaflet/dist/leaflet.css";
+
+// GREEN PICKUP ICON
+const pickupIcon = new L.Icon({
+  iconUrl:
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
+
+  shadowUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+
+  iconSize: [25, 41],
+
+  iconAnchor: [12, 41],
+});
+
+// RED DESTINATION ICON
+const destinationIcon =
+  new L.Icon({
+    iconUrl:
+      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
+
+    shadowUrl:
+      "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+
+    iconSize: [25, 41],
+
+    iconAnchor: [12, 41],
+  });
+
+// BLUE DRIVER ICON
+const driverIcon = new L.Icon({
+  iconUrl:
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png",
+
+  shadowUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+
+  iconSize: [25, 41],
+
+  iconAnchor: [12, 41],
+});
 
 // AUTO CENTER MAP
 function ChangeMapView({
   center,
 }) {
+
   const map = useMap();
 
   map.setView(center);
@@ -26,8 +69,11 @@ function DestinationSelector({
   setDestinationLocation,
   setDestination,
 }) {
+
   useMapEvents({
+
     async click(e) {
+
       const lat =
         e.latlng.lat;
 
@@ -41,6 +87,7 @@ function DestinationSelector({
       });
 
       try {
+
         // REVERSE GEOCODING
         const response =
           await fetch(
@@ -53,12 +100,15 @@ function DestinationSelector({
         if (
           data?.display_name
         ) {
+
           // AUTO FILL DESTINATION INPUT
           setDestination(
             data.display_name
           );
         }
+
       } catch (error) {
+
         console.log(error);
       }
     },
@@ -74,7 +124,9 @@ function RideMap({
   setDestination,
   driverLocation,
 }) {
+
   if (!customerLocation) {
+
     return (
       <h2>
         Loading Map...
@@ -83,11 +135,14 @@ function RideMap({
   }
 
   return (
+
     <MapContainer
       center={
         customerLocation
       }
+
       zoom={13}
+
       style={{
         height: "500px",
         width: "100%",
@@ -95,6 +150,7 @@ function RideMap({
           "10px",
       }}
     >
+
       <ChangeMapView
         center={
           customerLocation
@@ -106,6 +162,7 @@ function RideMap({
         setDestinationLocation={
           setDestinationLocation
         }
+
         setDestination={
           setDestination
         }
@@ -113,6 +170,7 @@ function RideMap({
 
       <TileLayer
         attribution="&copy; OpenStreetMap contributors"
+
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
@@ -121,40 +179,57 @@ function RideMap({
         position={
           customerLocation
         }
+
+        icon={pickupIcon}
       >
+
         <Popup>
           Pickup Location
         </Popup>
+
       </Marker>
 
       {/* DESTINATION */}
       {destinationLocation && (
+
         <Marker
           position={
             destinationLocation
           }
+
+          icon={
+            destinationIcon
+          }
         >
+
           <Popup>
             Destination
           </Popup>
+
         </Marker>
       )}
 
       {/* DRIVER */}
       {driverLocation && (
+
         <Marker
           position={
             driverLocation
           }
+
+          icon={driverIcon}
         >
+
           <Popup>
             Driver Location
           </Popup>
+
         </Marker>
       )}
 
       {/* DRIVER TO CUSTOMER */}
       {driverLocation && (
+
         <Polyline
           positions={[
             driverLocation,
@@ -165,6 +240,7 @@ function RideMap({
 
       {/* CUSTOMER TO DESTINATION */}
       {destinationLocation && (
+
         <Polyline
           positions={[
             customerLocation,
@@ -172,6 +248,7 @@ function RideMap({
           ]}
         />
       )}
+
     </MapContainer>
   );
 }

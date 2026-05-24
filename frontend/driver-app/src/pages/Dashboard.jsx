@@ -19,6 +19,11 @@ function Dashboard() {
   const [customerLocation, setCustomerLocation] =
     useState(null);
 
+  const [
+    destinationLocation,
+    setDestinationLocation,
+  ] = useState(null);
+
   const [rideStatus, setRideStatus] =
     useState("OFFLINE");
 
@@ -128,41 +133,38 @@ function Dashboard() {
       } catch (error) {
 
         console.log(
-  "Fetch rides error:",
-  error.response?.data ||
-  error.message
-);
+          "Fetch rides error:",
+          error.response?.data ||
+          error.message
+        );
 
         setPendingRides([]);
       }
     };
 
-  // FETCH ONCE WHEN ONLINE
-
-
   // ONLINE / OFFLINE
   const toggleOnlineStatus =
-  async () => {
+    async () => {
 
-    const newStatus =
-      !online;
+      const newStatus =
+        !online;
 
-    setOnline(
-      newStatus
-    );
+      setOnline(
+        newStatus
+      );
 
-    setRideStatus(
-      newStatus
-        ? "ONLINE"
-        : "OFFLINE"
-    );
+      setRideStatus(
+        newStatus
+          ? "ONLINE"
+          : "OFFLINE"
+      );
 
-    // FETCH RIDES WHEN ONLINE
-    if (newStatus) {
+      // FETCH RIDES WHEN ONLINE
+      if (newStatus) {
 
-      await fetchPendingRides();
-    }
-  };
+        await fetchPendingRides();
+      }
+    };
 
   // ACCEPT RIDE
   const acceptRide =
@@ -182,6 +184,11 @@ function Dashboard() {
         // CUSTOMER LOCATION
         setCustomerLocation(
           res.data.pickupLocation
+        );
+
+        // DESTINATION LOCATION
+        setDestinationLocation(
+          res.data.destinationLocation
         );
 
         // REMOVE FROM PENDING
@@ -285,6 +292,10 @@ function Dashboard() {
             null
           );
 
+          setDestinationLocation(
+            null
+          );
+
           setRideStatus(
             "ONLINE"
           );
@@ -317,6 +328,7 @@ function Dashboard() {
           onClick={
             toggleOnlineStatus
           }
+
           style={{
             padding:
               "10px 20px",
@@ -326,6 +338,18 @@ function Dashboard() {
 
             marginBottom:
               "20px",
+
+            backgroundColor:
+              online
+                ? "green"
+                : "black",
+
+            color: "white",
+
+            border: "none",
+
+            borderRadius:
+              "5px",
           }}
         >
 
@@ -358,6 +382,7 @@ function Dashboard() {
 
             <div
               key={ride._id}
+
               style={{
                 border:
                   "1px solid gray",
@@ -418,15 +443,28 @@ function Dashboard() {
                     ride._id
                   )
                 }
+
                 style={{
                   padding:
                     "8px 15px",
 
                   cursor:
                     "pointer",
+
+                  backgroundColor:
+                    "green",
+
+                  color: "white",
+
+                  border: "none",
+
+                  borderRadius:
+                    "5px",
                 }}
               >
+
                 Accept
+
               </button>
 
               {/* REJECT */}
@@ -436,6 +474,7 @@ function Dashboard() {
                     ride._id
                   )
                 }
+
                 style={{
                   padding:
                     "8px 15px",
@@ -445,9 +484,21 @@ function Dashboard() {
 
                   cursor:
                     "pointer",
+
+                  backgroundColor:
+                    "red",
+
+                  color: "white",
+
+                  border: "none",
+
+                  borderRadius:
+                    "5px",
                 }}
               >
+
                 Reject
+
               </button>
 
             </div>
@@ -568,6 +619,10 @@ function Dashboard() {
 
             customerLocation={
               customerLocation
+            }
+
+            destinationLocation={
+              destinationLocation
             }
 
             setDriverLocation={
