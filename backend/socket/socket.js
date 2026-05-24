@@ -1,11 +1,7 @@
-const socketHandler = (io) => {
-  io.on("connection", (socket) => {
-    console.log("Socket Connected");
+import { io } from "socket.io-client";
 
-    socket.on("disconnect", () => {
-      console.log("Socket Disconnected");
-    });
-  });
-};
+const socket = io(import.meta.env.VITE_SOCKET_URL, {
+  transports: ["websocket"],
+});
 
-export default socketHandler;
+export default socket;
