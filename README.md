@@ -1,60 +1,256 @@
-# Cab Booking Demo App
+# Cab Booking Demo – README Files
 
-A full-stack MERN Cab Booking Demo Application with:
+## Root `README.md`
 
-- Customer App
-- Driver App
-- Live Driver Tracking
-- Ride Requests
-- Real-time Ride Status Updates
-- Interactive Maps using Leaflet
-- Socket.IO Realtime Communication
+````md
+# Cab Booking Demo
 
----
+A full-stack real-time cab booking application built using the MERN stack.
 
-# Features
+The project includes:
 
-## Customer App
-
-Customers can:
-
-- Register / Login
-- Use current location automatically
-- Select destination from map
-- Book rides
-- Track driver live on map
-- View driver distance
-- View ride status updates
+- Customer App – Users can book rides and track drivers.
+- Driver App – Drivers can update live location and accept bookings.
+- Backend API – Handles authentication, booking management, sockets, and database operations.
 
 ---
 
-## Driver App
+## Tech Stack
 
-Drivers can:
-
-- Register / Login
-- Go Online / Offline
-- Receive ride requests in realtime
-- Accept / Reject rides
-- Update live location
-- Start trip
-- Complete trip
-- View customer pickup location
-- Simulate movement by clicking map
-
----
-
-# Tech Stack
-
-## Frontend
-
+### Frontend
 - React.js
-- React Router
-- Axios
+- Vite
+- React Router DOM
 - React Leaflet
 - Socket.IO Client
+- Axios
 
-## Backend
+### Backend
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+- JWT Authentication
+- Socket.IO
+
+---
+
+## Project Structure
+
+```bash
+cabbookingdemo-main/
+│
+├── backend/
+│   ├── config/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── models/
+│   ├── routes/
+│   ├── socket/
+│   ├── utils/
+│   └── server.js
+│
+├── frontend/
+│   ├── customer-app/
+│   └── driver-app/
+│
+└── README.md
+````
+
+---
+
+## Features
+
+### Customer App
+
+* User authentication
+* View nearby drivers
+* Book rides
+* Live driver tracking
+* Interactive maps using Leaflet
+
+### Driver App
+
+* Driver authentication
+* Live location updates
+* Accept customer bookings
+* Real-time ride updates
+
+### Backend
+
+* REST API support
+* JWT authentication
+* MongoDB integration
+* Real-time communication using Socket.IO
+
+---
+
+## Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-username/cabbookingdemo.git
+cd cabbookingdemo
+```
+
+---
+
+## Backend Setup
+
+```bash
+cd backend
+npm install
+```
+
+Create a `.env` file inside the backend folder.
+
+Example:
+
+```env
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_secret_key
+CLIENT_URL=http://localhost:5173
+```
+
+Run the backend server:
+
+```bash
+npm run dev
+```
+
+---
+
+## Customer App Setup
+
+```bash
+cd frontend/customer-app
+npm install
+```
+
+Create `.env` file:
+
+```env
+VITE_API_URL=http://localhost:5000
+VITE_SOCKET_URL=http://localhost:5000
+```
+
+Run the customer app:
+
+```bash
+npm run dev
+```
+
+---
+
+## Driver App Setup
+
+```bash
+cd frontend/driver-app
+npm install
+```
+
+Create `.env` file:
+
+```env
+VITE_API_URL=http://localhost:5000
+VITE_SOCKET_URL=http://localhost:5000
+```
+
+Run the driver app:
+
+```bash
+npm run dev
+```
+
+---
+
+## API Overview
+
+### Authentication
+
+* Register User
+* Login User
+* Register Driver
+* Login Driver
+
+### Booking
+
+* Create booking
+* Fetch bookings
+* Update ride status
+
+### Driver
+
+* Update driver location
+* Fetch nearby drivers
+
+---
+
+## Real-Time Features
+
+Socket.IO is used for:
+
+* Live driver location updates
+* Booking notifications
+* Ride status synchronization
+* Real-time map updates
+
+---
+
+## Deployment
+
+### Frontend
+
+You can deploy the frontend apps using:
+
+* Vercel
+* Netlify
+
+### Backend
+
+You can deploy the backend using:
+
+* Render
+* Railway
+* VPS
+
+### Database
+
+* MongoDB Atlas
+
+---
+
+## Future Improvements
+
+* Payment integration
+* Ride fare calculation
+* Ride history
+* Ratings and reviews
+* Admin dashboard
+* Push notifications
+
+---
+
+## Author
+
+Developed by Tunu Doley.
+
+````
+
+---
+
+# Backend `backend/README.md`
+
+```md
+# Backend – Cab Booking Demo
+
+Backend API for the Cab Booking Demo application.
+
+---
+
+## Tech Stack
 
 - Node.js
 - Express.js
@@ -65,126 +261,322 @@ Drivers can:
 
 ---
 
-# Project Structure
+## Installation
 
 ```bash
-cab-booking/
+npm install
+````
+
+---
+
+## Environment Variables
+
+Create a `.env` file:
+
+```env
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_secret_key
+CLIENT_URL=http://localhost:5173
+```
+
+---
+
+## Running the Server
+
+Development:
+
+```bash
+npm run dev
+```
+
+Production:
+
+```bash
+npm start
+```
+
+---
+
+## Folder Structure
+
+```bash
+backend/
 │
-├── backend/
-│
-├── frontend/
-│   ├── customer-app/
-│   └── driver-app/
-Installation
-1. Clone Repository
-git clone https://github.com/tunu7/cabbookingdemo.git
-Backend Setup
-Navigate
-cd backend
-Install Dependencies
-npm install
-Create .env
-PORT=5007
-MONGO_URI=YOUR_MONGODB_URI
-JWT_SECRET=YOUR_SECRET
-Run Backend
-npm run dev
+├── config/
+├── controllers/
+├── middleware/
+├── models/
+├── routes/
+├── socket/
+├── utils/
+└── server.js
+```
 
-Server runs on:
+---
 
-http://localhost:5007
-Customer App Setup
-Navigate
-cd frontend/customer-app
-Install Dependencies
-npm install
-Run
-npm run dev
+## Features
 
-Customer app runs on:
+* User Authentication
+* Driver Authentication
+* Booking APIs
+* Driver location updates
+* Socket.IO integration
+* MongoDB database support
 
-http://localhost:5173
-Driver App Setup
-Navigate
-cd frontend/driver-app
-Install Dependencies
-npm install
-Run
-npm run dev
+---
 
-Driver app runs on:
+## Socket Events
 
-http://localhost:5174
-Realtime Features
+### Emit Events
 
-This project uses:
+* `driver-location-update`
+* `new-booking`
+* `ride-status-update`
 
-Socket.IO
-Live polling
-MongoDB realtime updates
+---
 
-for:
+## API Endpoints
 
-Ride requests
-Driver tracking
-Ride status updates
-Maps
+### Auth Routes
 
-Maps are implemented using:
+* `/api/auth/register`
+* `/api/auth/login`
 
-OpenStreetMap
-React Leaflet
+### Driver Routes
 
-Features:
+* `/api/drivers/location`
+* `/api/drivers/all`
 
-Live driver marker
-Pickup marker
-Destination marker
-Route polyline
-Ride Flow
-Customer
-Login
-Current location auto detected
-Choose destination
-Book ride
-Wait for driver
-Track driver live
-Driver
-Login
-Go Online
-Receive ride request
-Accept ride
-Move driver marker
-Start trip
-Complete trip
-API Routes
-Ride Routes
-POST   /api/rides/book
-GET    /api/rides/pending
-GET    /api/rides/:id
-GET    /api/rides/:rideId/driver-location
-POST   /api/rides/:id/accept
-POST   /api/rides/:id/reject
-PATCH  /api/rides/:id/status
-Authentication
+### Booking Routes
 
-JWT Authentication is used.
+* `/api/bookings/create`
+* `/api/bookings/update`
 
-Protected routes require:
+---
 
-Authorization: Bearer TOKEN
-Future Improvements
-Google Maps Integration
-Route Optimization
-Fare Calculation
-Driver ETA
-Payment Gateway
-Ride History
-Notifications
-Production Deployment
-Author
+## Deployment
+
+Recommended Platforms:
+
+* Render
+* Railway
+* VPS
+
+---
+
+## Author
 
 Tunu Doley
 
-GitHub:
-https://github.com/tunu7
+````
+
+---
+
+# Customer App `frontend/customer-app/README.md`
+
+```md
+# Customer App – Cab Booking Demo
+
+Frontend application for customers to book rides and track drivers in real-time.
+
+---
+
+## Tech Stack
+
+- React.js
+- Vite
+- React Router DOM
+- React Leaflet
+- Axios
+- Socket.IO Client
+
+---
+
+## Installation
+
+```bash
+npm install
+````
+
+---
+
+## Environment Variables
+
+Create a `.env` file:
+
+```env
+VITE_API_URL=http://localhost:5000
+VITE_SOCKET_URL=http://localhost:5000
+```
+
+---
+
+## Run Application
+
+```bash
+npm run dev
+```
+
+---
+
+## Features
+
+* User authentication
+* Book rides
+* View nearby drivers
+* Live ride tracking
+* Interactive map integration
+* Real-time updates using Socket.IO
+
+---
+
+## Build for Production
+
+```bash
+npm run build
+```
+
+---
+
+## Preview Production Build
+
+```bash
+npm run preview
+```
+
+---
+
+## Folder Structure
+
+```bash
+customer-app/
+│
+├── src/
+├── public/
+├── package.json
+└── vite.config.js
+```
+
+---
+
+## Deployment
+
+Recommended:
+
+* Vercel
+* Netlify
+
+---
+
+## Author
+
+Tunu Doley
+
+````
+
+---
+
+# Driver App `frontend/driver-app/README.md`
+
+```md
+# Driver App – Cab Booking Demo
+
+Frontend application for drivers to manage bookings and update live locations.
+
+---
+
+## Tech Stack
+
+- React.js
+- Vite
+- React Router DOM
+- React Leaflet
+- Axios
+- Socket.IO Client
+- Geolib
+
+---
+
+## Installation
+
+```bash
+npm install
+````
+
+---
+
+## Environment Variables
+
+Create a `.env` file:
+
+```env
+VITE_API_URL=http://localhost:5000
+VITE_SOCKET_URL=http://localhost:5000
+```
+
+---
+
+## Run Application
+
+```bash
+npm run dev
+```
+
+---
+
+## Features
+
+* Driver authentication
+* Live location updates
+* Accept ride requests
+* Real-time booking synchronization
+* Interactive map support
+* Route and distance calculation
+
+---
+
+## Build for Production
+
+```bash
+npm run build
+```
+
+---
+
+## Preview Production Build
+
+```bash
+npm run preview
+```
+
+---
+
+## Folder Structure
+
+```bash
+driver-app/
+│
+├── src/
+├── public/
+├── package.json
+└── vite.config.js
+```
+
+---
+
+## Deployment
+
+Recommended:
+
+* Vercel
+* Netlify
+
+---
+
+## Author
+
+Tunu Doley
+
+```
+```
