@@ -6,10 +6,9 @@ import Navbar from "../components/Navbar";
 
 import RideMap from "../components/RideMap";
 
-function Dashboard() {
-  const [bookingLoading, setBookingLoading] =
-    useState(false);
+import socket from "../socket/socket";
 
+function Dashboard() {
   const [pickup, setPickup] =
     useState("");
 
@@ -30,12 +29,15 @@ function Dashboard() {
   const [ride, setRide] =
     useState(null);
 
+  const [bookingLoading, setBookingLoading] =
+    useState(false);
+
   const [isMobile, setIsMobile] =
     useState(
       window.innerWidth <= 900
     );
 
-  // RESPONSIVE CHECK
+  // RESPONSIVE
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(
@@ -56,25 +58,103 @@ function Dashboard() {
     };
   }, []);
 
-  // GET CURRENT LOCATION
+  // SOCKET CONNECTION
   useEffect(() => {
-    if (!navigator.geolocation) {
-      alert(
-        "Geolocation not supported"
+    socket.connect();
+
+    // DRIVER LIVE LOCATION
+    const handleDriverLocation =
+      (data) => {
+        console.log(
+          "SOCKET DRIVER UPDATE:",
+          data
+        );
+
+        const liveLocation =
+          data?.location;
+
+        if (
+          liveLocation?.lat !==
+            undefined &&
+          liveLocation?.lng !==
+            undefined
+        ) {
+          const formattedLocation =
+            {
+              lat: Number(
+                liveLocation.lat
+              ),
+
+              lng: Number(
+                liveLocation.lng
+              ),
+            };
+
+          console.log(
+            "SETTING DRIVER LOCATION:",
+            formattedLocation
+          );
+
+          setDriverLocation(
+            formattedLocation
+          );
+        }
+      };
+
+    // RIDE ACCEPTED
+    const handleRideAccepted =
+      (updatedRide) => {
+        console.log(
+          "RIDE ACCEPTED:",
+          updatedRide
+        );
+
+        setRide((prevRide) => {
+          if (
+            prevRide?._id ===
+            updatedRide._id
+          ) {
+            return updatedRide;
+          }
+
+          return prevRide;
+        });
+      };
+
+    socket.on(
+      "driver-location-update",
+      handleDriverLocation
+    );
+
+    socket.on(
+      "ride-accepted",
+      handleRideAccepted
+    );
+
+    return () => {
+      socket.off(
+        "driver-location-update",
+        handleDriverLocation
       );
 
-      return;
-    }
+      socket.off(
+        "ride-accepted",
+        handleRideAccepted
+      );
 
+      socket.disconnect();
+    };
+  }, []);
+
+  // CURRENT LOCATION
+  useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const lat =
-          position.coords
-            .latitude;
+          position.coords.latitude;
 
         const lng =
-          position.coords
-            .longitude;
+          position.coords.longitude;
 
         const currentLocation = {
           lat,
@@ -104,76 +184,86 @@ function Dashboard() {
         } catch (error) {
           console.log(error);
         }
-      },
-
-      (error) => {
-        console.log(error);
-
-        alert(
-          "Unable to fetch current location"
-        );
-      },
-
-      {
-        enableHighAccuracy: true,
       }
     );
   }, []);
 
-  // FETCH LIVE RIDE DATA
+  // LIVE RIDE TRACKING
   useEffect(() => {
-    if (!ride?._id) {
-      return;
-    }
+    if (!ride?._id) return;
 
-    const fetchRideData =
-      async () => {
+    const interval =
+      setInterval(async () => {
         try {
-          const locationRes =
-            await API.get(
-              `/rides/${ride._id}/driver-location`
-            );
-
-          if (
-            locationRes.data
-              ?.location
-          ) {
-            setDriverLocation(
-              locationRes.data
-                .location
-            );
-          }
-
+          // FETCH UPDATED RIDE
           const rideRes =
             await API.get(
               `/rides/${ride._id}`
             );
 
+          const updatedRide =
+            rideRes.data;
+
+          console.log(
+            "UPDATED RIDE:",
+            updatedRide
+          );
+
+          setRide(updatedRide);
+
+          // ONLY FETCH DRIVER LOCATION
+          // IF DRIVER EXISTS
           if (
-            rideRes.data
+            updatedRide?.driver
           ) {
-            setRide(
-              rideRes.data
+            const locationRes =
+              await API.get(
+                `/rides/${ride._id}/driver-location`
+              );
+
+            console.log(
+              "DRIVER LOCATION RESPONSE:",
+              locationRes.data
             );
+
+            const liveLocation =
+              locationRes.data
+                ?.location;
+
+            if (
+              liveLocation?.lat !==
+                undefined &&
+              liveLocation?.lng !==
+                undefined
+            ) {
+              const formattedLocation =
+                {
+                  lat: Number(
+                    liveLocation.lat
+                  ),
+
+                  lng: Number(
+                    liveLocation.lng
+                  ),
+                };
+
+              console.log(
+                "POLLING DRIVER LOCATION:",
+                formattedLocation
+              );
+
+              setDriverLocation(
+                formattedLocation
+              );
+            }
           }
         } catch (error) {
           console.log(error);
         }
-      };
+      }, 2000);
 
-    fetchRideData();
-
-    const interval =
-      setInterval(
-        fetchRideData,
-        3000
-      );
-
-    return () => {
-      clearInterval(
-        interval
-      );
-    };
+    return () =>
+      clearInterval(interval);
   }, [ride?._id]);
 
   // GET COORDINATES
@@ -182,14 +272,15 @@ function Dashboard() {
       try {
         const response =
           await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${place}`
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+              place
+            )}`
           );
 
         const data =
           await response.json();
 
         if (
-          data &&
           data.length > 0
         ) {
           return {
@@ -211,7 +302,7 @@ function Dashboard() {
       }
     };
 
-  // CALCULATE DISTANCE
+  // DISTANCE
   const calculateDistance = (
     lat1,
     lon1,
@@ -260,7 +351,8 @@ function Dashboard() {
     );
   };
 
-  const distance =
+  // DRIVER DISTANCE
+  const driverDistance =
     pickupLocation &&
     driverLocation
       ? calculateDistance(
@@ -271,82 +363,84 @@ function Dashboard() {
         )
       : 0;
 
+  // ETA
+  const eta =
+    driverDistance > 0
+      ? Math.max(
+          1,
+          Math.round(
+            driverDistance /
+              250
+          )
+        )
+      : 0;
+
+  // TRIP DISTANCE
+  const tripDistance =
+    pickupLocation &&
+    destinationLocation
+      ? calculateDistance(
+          pickupLocation.lat,
+          pickupLocation.lng,
+          destinationLocation.lat,
+          destinationLocation.lng
+        )
+      : 0;
+
+  // FARE
+  const estimatedFare =
+    tripDistance > 0
+      ? Math.max(
+          80,
+          Math.round(
+            tripDistance / 100
+          )
+        )
+      : 0;
+
   // BOOK RIDE
   const bookRide =
     async () => {
-      if (
-        !pickup ||
-        !destination
-      ) {
-        alert(
-          "Please enter locations"
-        );
-
-        return;
-      }
-
       try {
         setBookingLoading(
           true
         );
 
-        const pickupCoords =
-          await getCoordinates(
-            pickup
-          );
-
         const destinationCoords =
-          await getCoordinates(
+          destinationLocation ||
+          (await getCoordinates(
             destination
-          );
-
-        if (
-          !pickupCoords ||
-          !destinationCoords
-        ) {
-          alert(
-            "Location not found"
-          );
-
-          setBookingLoading(
-            false
-          );
-
-          return;
-        }
-
-        setPickupLocation(
-          pickupCoords
-        );
-
-        setDestinationLocation(
-          destinationCoords
-        );
+          ));
 
         const res =
           await API.post(
             "/rides/book",
             {
-              pickupLocation:
-                pickupCoords,
-
+              pickupLocation,
               destinationLocation:
                 destinationCoords,
             }
           );
 
-        setRide(
+        console.log(
+          "BOOKED RIDE:",
           res.data
         );
 
+        setRide(res.data);
+
+        setDestinationLocation(
+          destinationCoords
+        );
+
         alert(
-          "Ride Requested Successfully"
+          "Ride booked successfully"
         );
       } catch (error) {
         console.log(error);
 
         alert(
-          "Booking Failed"
+          "Booking failed"
         );
       } finally {
         setBookingLoading(
@@ -360,58 +454,20 @@ function Dashboard() {
       style={{
         minHeight: "100vh",
         background:
-          "#f4f7fb",
+          "#f3f6fb",
       }}
     >
       <Navbar />
 
       <div
         style={{
-          maxWidth: "1400px",
+          maxWidth: "1450px",
           margin: "0 auto",
           padding: isMobile
             ? "15px"
             : "30px 20px",
         }}
       >
-        {/* HEADER */}
-        <div
-          style={{
-            marginBottom: "25px",
-          }}
-        >
-          <h1
-            style={{
-              fontSize: isMobile
-                ? "28px"
-                : "36px",
-
-              fontWeight: "700",
-
-              color: "#111827",
-
-              marginBottom: "8px",
-            }}
-          >
-            Ride Dashboard
-          </h1>
-
-          <p
-            style={{
-              color: "#6b7280",
-
-              fontSize: isMobile
-                ? "14px"
-                : "16px",
-            }}
-          >
-            Book rides and track
-            your driver live in
-            real-time.
-          </p>
-        </div>
-
-        {/* MAIN CONTENT */}
         <div
           style={{
             display: "grid",
@@ -419,7 +475,7 @@ function Dashboard() {
             gridTemplateColumns:
               isMobile
                 ? "1fr"
-                : "400px 1fr",
+                : "420px 1fr",
 
             gap: "25px",
           }}
@@ -429,140 +485,62 @@ function Dashboard() {
             style={{
               background: "white",
 
-              padding: isMobile
-                ? "18px"
-                : "25px",
+              padding: "25px",
 
-              borderRadius: "20px",
-
-              boxShadow:
-                "0 8px 25px rgba(0,0,0,0.06)",
-
-              height: "fit-content",
+              borderRadius:
+                "24px",
             }}
           >
-            <h2
-              style={{
-                marginBottom: "25px",
-
-                color: "#111827",
-
-                fontSize: isMobile
-                  ? "22px"
-                  : "26px",
-              }}
-            >
-              Book a Ride
+            <h2>
+              {ride
+                ? "Ride Booked"
+                : "Book Ride"}
             </h2>
 
-            {/* PICKUP */}
-            <div
+            <input
+              type="text"
+              value={pickup}
+              onChange={(e) =>
+                setPickup(
+                  e.target.value
+                )
+              }
+              placeholder="Pickup"
+              disabled={!!ride}
               style={{
-                marginBottom: "18px",
+                width: "100%",
+                padding: "15px",
+                marginBottom:
+                  "15px",
               }}
-            >
-              <label
-                style={{
-                  display: "block",
+            />
 
-                  marginBottom: "8px",
-
-                  fontWeight: "600",
-
-                  color: "#374151",
-                }}
-              >
-                Pickup Location
-              </label>
-
-              <input
-                type="text"
-                placeholder="Enter pickup location"
-                value={pickup}
-                onChange={(e) =>
-                  setPickup(
-                    e.target.value
-                  )
-                }
-                style={{
-                  width: "100%",
-
-                  padding: "14px",
-
-                  border:
-                    "1px solid #d1d5db",
-
-                  borderRadius:
-                    "12px",
-
-                  fontSize: "15px",
-
-                  outline: "none",
-
-                  boxSizing:
-                    "border-box",
-                }}
-              />
-            </div>
-
-            {/* DESTINATION */}
-            <div
+            <input
+              type="text"
+              value={destination}
+              onChange={(e) =>
+                setDestination(
+                  e.target.value
+                )
+              }
+              placeholder="Destination"
+              disabled={!!ride}
               style={{
-                marginBottom: "25px",
+                width: "100%",
+                padding: "15px",
+                marginBottom:
+                  "15px",
               }}
-            >
-              <label
-                style={{
-                  display: "block",
+            />
 
-                  marginBottom: "8px",
-
-                  fontWeight: "600",
-
-                  color: "#374151",
-                }}
-              >
-                Destination
-              </label>
-
-              <input
-                type="text"
-                placeholder="Enter destination"
-                value={
-                  destination
-                }
-                onChange={(e) =>
-                  setDestination(
-                    e.target.value
-                  )
-                }
-                style={{
-                  width: "100%",
-
-                  padding: "14px",
-
-                  border:
-                    "1px solid #d1d5db",
-
-                  borderRadius:
-                    "12px",
-
-                  fontSize: "15px",
-
-                  outline: "none",
-
-                  boxSizing:
-                    "border-box",
-                }}
-              />
-            </div>
-
-            {/* BUTTON */}
             <button
               onClick={
                 bookRide
               }
-              disabled={ride}
+              disabled={
+                bookingLoading ||
+                !!ride
+              }
               style={{
                 width: "100%",
 
@@ -573,15 +551,6 @@ function Dashboard() {
                 borderRadius:
                   "12px",
 
-                fontSize: "16px",
-
-                fontWeight: "600",
-
-                cursor:
-                  ride
-                    ? "not-allowed"
-                    : "pointer",
-
                 background:
                   ride
                     ? "#16a34a"
@@ -589,134 +558,97 @@ function Dashboard() {
 
                 color: "white",
 
-                transition:
-                  "0.3s ease",
+                fontWeight:
+                  "700",
               }}
             >
               {bookingLoading
-                ? "Booking Ride..."
+                ? "Booking..."
                 : ride
                 ? "Ride Booked"
                 : "Book Ride"}
             </button>
 
-            {/* RIDE INFO */}
-            {ride && (
-              <div
-                style={{
-                  marginTop: "25px",
+            {/* STATS */}
+            <div
+              style={{
+                marginTop: "25px",
+              }}
+            >
+              <h3>
+                Ride Stats
+              </h3>
 
-                  padding: "18px",
+              <p>
+                Status:
+                {" "}
+                <strong>
+                  {ride?.status ||
+                    "WAITING"}
+                </strong>
+              </p>
 
-                  borderRadius:
-                    "14px",
+              <p>
+                ETA:
+                {" "}
+                <strong>
+                  {eta}
+                  {" "}
+                  min
+                </strong>
+              </p>
 
-                  background:
-                    "#f9fafb",
+              <p>
+                Driver Distance:
+                {" "}
+                <strong>
+                  {
+                    driverDistance
+                  }
+                  {" "}
+                  m
+                </strong>
+              </p>
 
-                  border:
-                    "1px solid #e5e7eb",
-                }}
-              >
-                <h3
-                  style={{
-                    marginBottom:
-                      "15px",
+              <p>
+                Trip Distance:
+                {" "}
+                <strong>
+                  {(
+                    tripDistance /
+                    1000
+                  ).toFixed(2)}
+                  {" "}
+                  km
+                </strong>
+              </p>
 
-                    color:
-                      "#111827",
-                  }}
-                >
-                  Ride Details
-                </h3>
+              <p>
+                Fare:
+                {" "}
+                <strong>
+                  ₹
+                  {
+                    estimatedFare
+                  }
+                </strong>
+              </p>
 
-                <div
-                  style={{
-                    display:
-                      "flex",
-
-                    justifyContent:
-                      "space-between",
-
-                    marginBottom:
-                      "12px",
-                  }}
-                >
-                  <span
-                    style={{
-                      color:
-                        "#6b7280",
-                    }}
-                  >
-                    Status
-                  </span>
-
-                  <span
-                    style={{
-                      fontWeight:
-                        "600",
-
-                      color:
-                        "#2563eb",
-
-                      textTransform:
-                        "capitalize",
-                    }}
-                  >
-                    {
-                      ride.status
-                    }
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    display:
-                      "flex",
-
-                    justifyContent:
-                      "space-between",
-                  }}
-                >
-                  <span
-                    style={{
-                      color:
-                        "#6b7280",
-                    }}
-                  >
-                    Driver Distance
-                  </span>
-
-                  <span
-                    style={{
-                      fontWeight:
-                        "600",
-                    }}
-                  >
-                    {distance} m
-                  </span>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
 
-          {/* MAP SECTION */}
+          {/* MAP */}
           <div
             style={{
-              background: "white",
-
-              borderRadius: "20px",
-
-              overflow: "hidden",
-
-              boxShadow:
-                "0 8px 25px rgba(0,0,0,0.06)",
-
               height: isMobile
-                ? "450px"
-                : "650px",
+                ? "500px"
+                : "820px",
 
-              width: "100%",
+              borderRadius:
+                "24px",
+
+              overflow:
+                "hidden",
             }}
           >
             <RideMap

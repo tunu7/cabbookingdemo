@@ -70,46 +70,41 @@ export const getPendingRides =
 
 
 // ACCEPT RIDE
-export const acceptRide =
-  async (req, res) => {
+export const acceptRide = async (req, res) => {
+  try {
+    const ride = await Ride.findById(
+      req.params.id
+    );
 
-    try {
-
-      const ride =
-        await Ride.findById(
-          req.params.id
-        );
-
-      if (!ride) {
-
-        return res
-          .status(404)
-          .json({
-            message:
-              "Ride not found",
-          });
-      }
-
-      ride.driver =
-        req.user.id;
-
-      ride.status =
-        "ACCEPTED";
-
-      await ride.save();
-
-      res.json(ride);
-
-    } catch (error) {
-
-      console.log(error);
-
-      res.status(500).json({
-        message:
-          error.message,
+    if (!ride) {
+      return res.status(404).json({
+        message: "Ride not found",
       });
     }
-  };
+
+    ride.driver = req.user.id;
+
+    ride.status = "ACCEPTED";
+
+    await ride.save();
+
+    // IMPORTANT
+    req.io.emit(
+      "ride-accepted",
+      ride
+    );
+
+    res.json(ride);
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 
 // REJECT RIDE
@@ -201,10 +196,13 @@ export const getRideById =
 
     try {
 
-      const ride =
-        await Ride.findById(
-          req.params.id
-        );
+     const ride =
+  await Ride.findById(
+    req.params.id
+  ).populate(
+    "driver",
+    "name email currentLocation"
+  );
 
       if (!ride) {
 

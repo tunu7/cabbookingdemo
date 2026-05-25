@@ -62,14 +62,28 @@ function Dashboard() {
     };
   }, []);
 
+  // SOCKET CONNECT
+  useEffect(() => {
+    socket.connect();
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
   // UPDATE DRIVER LOCATION
   const updateDriverLocation =
     async (lat, lng) => {
       try {
         const location = {
-          lat,
-          lng,
+          lat: Number(lat),
+          lng: Number(lng),
         };
+
+        console.log(
+          "UPDATING DRIVER:",
+          location
+        );
 
         setDriverLocationState(
           location
@@ -79,21 +93,63 @@ function Dashboard() {
           "/location/update",
           location
         );
-
-        console.log(
-          "Driver Location Updated"
-        );
       } catch (error) {
         console.log(error);
       }
     };
 
-  // SOCKET LISTENER
+  // LIVE GPS TRACKING
+  useEffect(() => {
+    if (!online) return;
+
+    const watchId =
+      navigator.geolocation.watchPosition(
+        async (
+          position
+        ) => {
+          const lat =
+            position.coords
+              .latitude;
+
+          const lng =
+            position.coords
+              .longitude;
+
+          await updateDriverLocation(
+            lat,
+            lng
+          );
+        },
+
+        (error) => {
+          console.log(error);
+        },
+
+        {
+          enableHighAccuracy: true,
+          maximumAge: 0,
+          timeout: 5000,
+        }
+      );
+
+    return () => {
+      navigator.geolocation.clearWatch(
+        watchId
+      );
+    };
+  }, [online]);
+
+  // SOCKET NEW RIDE
   useEffect(() => {
     socket.on(
       "newRide",
 
       (ride) => {
+        console.log(
+          "NEW RIDE:",
+          ride
+        );
+
         setPendingRides(
           (prev) => {
             const exists =
@@ -122,7 +178,7 @@ function Dashboard() {
     };
   }, []);
 
-  // FETCH RIDES
+  // FETCH PENDING RIDES
   const fetchPendingRides =
     async () => {
       try {
@@ -130,6 +186,11 @@ function Dashboard() {
           await API.get(
             "/rides/pending"
           );
+
+        console.log(
+          "PENDING RIDES:",
+          res.data
+        );
 
         if (
           Array.isArray(
@@ -149,7 +210,7 @@ function Dashboard() {
       }
     };
 
-  // TOGGLE ONLINE STATUS
+  // TOGGLE ONLINE
   const toggleOnlineStatus =
     async () => {
       const newStatus =
@@ -167,6 +228,20 @@ function Dashboard() {
 
       if (newStatus) {
         await fetchPendingRides();
+      } else {
+        setPendingRides([]);
+
+        setCurrentRide(
+          null
+        );
+
+        setCustomerLocation(
+          null
+        );
+
+        setDestinationLocation(
+          null
+        );
       }
     };
 
@@ -179,16 +254,23 @@ function Dashboard() {
             `/rides/${rideId}/accept`
           );
 
+        console.log(
+          "ACCEPTED RIDE:",
+          res.data
+        );
+
         setCurrentRide(
           res.data
         );
 
         setCustomerLocation(
-          res.data.pickupLocation
+          res.data
+            .pickupLocation
         );
 
         setDestinationLocation(
-          res.data.destinationLocation
+          res.data
+            .destinationLocation
         );
 
         setPendingRides(
@@ -241,7 +323,7 @@ function Dashboard() {
       }
     };
 
-  // UPDATE STATUS
+  // UPDATE RIDE STATUS
   const updateRideStatus =
     async (status) => {
       if (
@@ -263,8 +345,17 @@ function Dashboard() {
             }
           );
 
+        console.log(
+          "UPDATED STATUS:",
+          res.data
+        );
+
         setRideStatus(
           res.data.status
+        );
+
+        setCurrentRide(
+          res.data
         );
 
         if (
@@ -292,22 +383,118 @@ function Dashboard() {
       }
     };
 
+  // DISTANCE
+  const calculateDistance = (
+    lat1,
+    lon1,
+    lat2,
+    lon2
+  ) => {
+    const R = 6371e3;
+
+    const φ1 =
+      (lat1 * Math.PI) /
+      180;
+
+    const φ2 =
+      (lat2 * Math.PI) /
+      180;
+
+    const Δφ =
+      ((lat2 - lat1) *
+        Math.PI) /
+      180;
+
+    const Δλ =
+      ((lon2 - lon1) *
+        Math.PI) /
+      180;
+
+    const a =
+      Math.sin(Δφ / 2) *
+        Math.sin(
+          Δφ / 2
+        ) +
+      Math.cos(φ1) *
+        Math.cos(φ2) *
+        Math.sin(Δλ / 2) *
+        Math.sin(
+          Δλ / 2
+        );
+
+    const c =
+      2 *
+      Math.atan2(
+        Math.sqrt(a),
+        Math.sqrt(1 - a)
+      );
+
+    return Math.round(
+      R * c
+    );
+  };
+
+  // CUSTOMER DISTANCE
+  const customerDistance =
+    driverLocation &&
+    customerLocation
+      ? calculateDistance(
+          driverLocation.lat,
+          driverLocation.lng,
+          customerLocation.lat,
+          customerLocation.lng
+        )
+      : 0;
+
+  // TRIP DISTANCE
+  const tripDistance =
+    customerLocation &&
+    destinationLocation
+      ? calculateDistance(
+          customerLocation.lat,
+          customerLocation.lng,
+          destinationLocation.lat,
+          destinationLocation.lng
+        )
+      : 0;
+
+  // ETA
+  const eta =
+    customerDistance > 0
+      ? Math.max(
+          1,
+          Math.round(
+            customerDistance /
+              250
+          )
+        )
+      : 0;
+
+  // FARE
+  const estimatedFare =
+    tripDistance > 0
+      ? Math.max(
+          80,
+          Math.round(
+            tripDistance / 100
+          )
+        )
+      : 0;
+
   return (
     <div
       style={{
         minHeight: "100vh",
         background:
-          "#f4f7fb",
+          "#f3f6fb",
       }}
     >
       <Navbar />
 
       <div
         style={{
-          maxWidth: "1400px",
-
+          maxWidth: "1450px",
           margin: "0 auto",
-
           padding: isMobile
             ? "15px"
             : "30px 20px",
@@ -317,16 +504,11 @@ function Dashboard() {
         <div
           style={{
             marginBottom: "30px",
-
             display: "flex",
-
             justifyContent:
               "space-between",
-
             alignItems: "center",
-
             flexWrap: "wrap",
-
             gap: "15px",
           }}
         >
@@ -334,14 +516,10 @@ function Dashboard() {
             <h1
               style={{
                 fontSize: isMobile
-                  ? "28px"
-                  : "36px",
-
-                fontWeight: "700",
-
+                  ? "30px"
+                  : "42px",
+                fontWeight: "800",
                 color: "#111827",
-
-                marginBottom: "8px",
               }}
             >
               Driver Dashboard
@@ -350,15 +528,10 @@ function Dashboard() {
             <p
               style={{
                 color: "#6b7280",
-
-                fontSize: isMobile
-                  ? "14px"
-                  : "16px",
               }}
             >
-              Manage ride requests
-              and track passengers
-              live in real-time.
+              Live realtime ride
+              tracking.
             </p>
           </div>
 
@@ -368,30 +541,18 @@ function Dashboard() {
               toggleOnlineStatus
             }
             style={{
-              width: isMobile
-                ? "100%"
-                : "auto",
-
               padding:
-                "14px 22px",
-
+                "15px 24px",
               border: "none",
-
               borderRadius:
-                "12px",
-
+                "16px",
               background:
                 online
                   ? "#16a34a"
                   : "#111827",
-
               color: "white",
-
-              fontWeight: "600",
-
+              fontWeight: "700",
               cursor: "pointer",
-
-              fontSize: "15px",
             }}
           >
             {online
@@ -400,94 +561,140 @@ function Dashboard() {
           </button>
         </div>
 
-        {/* STATUS CARD */}
-        <div
-          style={{
-            background: "white",
-
-            padding: "18px 22px",
-
-            borderRadius: "18px",
-
-            marginBottom: "25px",
-
-            boxShadow:
-              "0 8px 25px rgba(0,0,0,0.05)",
-
-            display: "flex",
-
-            justifyContent:
-              "space-between",
-
-            alignItems: "center",
-          }}
-        >
-          <div>
-            <h3
-              style={{
-                margin: 0,
-
-                color: "#6b7280",
-
-                fontSize: "15px",
-              }}
-            >
-              Current Status
-            </h3>
-
-            <h2
-              style={{
-                marginTop: "5px",
-
-                color:
-                  rideStatus ===
-                  "OFFLINE"
-                    ? "#dc2626"
-                    : "#16a34a",
-              }}
-            >
-              {rideStatus}
-            </h2>
-          </div>
-
-          <div
-            style={{
-              width: "14px",
-
-              height: "14px",
-
-              borderRadius:
-                "50%",
-
-              background:
-                online
-                  ? "#16a34a"
-                  : "#dc2626",
-            }}
-          />
-        </div>
-
-        {/* MAIN GRID */}
+        {/* STATS */}
         <div
           style={{
             display: "grid",
-
             gridTemplateColumns:
               isMobile
                 ? "1fr"
-                : "400px 1fr",
+                : "repeat(4,1fr)",
+            gap: "18px",
+            marginBottom: "25px",
+          }}
+        >
+          {/* STATUS */}
+          <div
+            style={{
+              background: "white",
+              padding: "22px",
+              borderRadius:
+                "22px",
+            }}
+          >
+            <div>
+              Driver Status
+            </div>
 
+            <div
+              style={{
+                fontSize: "26px",
+                fontWeight: "800",
+                color:
+                  online
+                    ? "#16a34a"
+                    : "#dc2626",
+              }}
+            >
+              {rideStatus}
+            </div>
+          </div>
+
+          {/* ETA */}
+          <div
+            style={{
+              background: "white",
+              padding: "22px",
+              borderRadius:
+                "22px",
+            }}
+          >
+            <div>
+              ETA to Pickup
+            </div>
+
+            <div
+              style={{
+                fontSize: "26px",
+                fontWeight: "800",
+              }}
+            >
+              {eta} min
+            </div>
+          </div>
+
+          {/* DISTANCE */}
+          <div
+            style={{
+              background: "white",
+              padding: "22px",
+              borderRadius:
+                "22px",
+            }}
+          >
+            <div>
+              Trip Distance
+            </div>
+
+            <div
+              style={{
+                fontSize: "26px",
+                fontWeight: "800",
+              }}
+            >
+              {(
+                tripDistance /
+                1000
+              ).toFixed(1)}{" "}
+              km
+            </div>
+          </div>
+
+          {/* FARE */}
+          <div
+            style={{
+              background: "white",
+              padding: "22px",
+              borderRadius:
+                "22px",
+            }}
+          >
+            <div>
+              Estimated Fare
+            </div>
+
+            <div
+              style={{
+                fontSize: "26px",
+                fontWeight: "800",
+                color: "#16a34a",
+              }}
+            >
+              ₹
+              {
+                estimatedFare
+              }
+            </div>
+          </div>
+        </div>
+
+        {/* MAIN */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              isMobile
+                ? "1fr"
+                : "420px 1fr",
             gap: "25px",
           }}
         >
-          {/* LEFT SIDE */}
+          {/* LEFT */}
           <div
             style={{
               display: "flex",
-
               flexDirection:
                 "column",
-
               gap: "25px",
             }}
           >
@@ -495,39 +702,24 @@ function Dashboard() {
             <div
               style={{
                 background: "white",
-
                 borderRadius:
-                  "20px",
-
-                padding: isMobile
-                  ? "18px"
-                  : "25px",
-
-                boxShadow:
-                  "0 8px 25px rgba(0,0,0,0.05)",
+                  "24px",
+                padding: "25px",
               }}
             >
-              <h2
-                style={{
-                  marginBottom:
-                    "20px",
-
-                  color:
-                    "#111827",
-                }}
-              >
-                Pending Rides
+              <h2>
+                Pending Rides (
+                {
+                  pendingRides.length
+                }
+                )
               </h2>
 
               {pendingRides.length ===
                 0 && (
-                <p
-                  style={{
-                    color:
-                      "#6b7280",
-                  }}
-                >
-                  No Ride Requests
+                <p>
+                  No Ride
+                  Requests
                 </p>
               )}
 
@@ -539,96 +731,62 @@ function Dashboard() {
                     }
                     style={{
                       border:
-                        "1px solid #e5e7eb",
-
+                        "1px solid #eee",
                       borderRadius:
-                        "16px",
-
+                        "18px",
                       padding:
                         "18px",
-
                       marginBottom:
-                        "18px",
-
-                      background:
-                        "#f9fafb",
+                        "15px",
                     }}
                   >
-                    <div
-                      style={{
-                        marginBottom:
-                          "12px",
+                    <p>
+                      Pickup:
+                      {" "}
+                      {
+                        ride
+                          .pickupLocation
+                          ?.lat
+                      }
 
-                        fontSize:
-                          "14px",
+                      ,
 
-                        wordBreak:
-                          "break-word",
-                      }}
-                    >
-                      <p>
-                        <strong>
-                          Pickup:
-                        </strong>
+                      {" "}
 
-                        <br />
+                      {
+                        ride
+                          .pickupLocation
+                          ?.lng
+                      }
+                    </p>
 
-                        {
-                          ride
-                            .pickupLocation
-                            ?.lat
-                        }
+                    <p>
+                      Destination:
+                      {" "}
+                      {
+                        ride
+                          .destinationLocation
+                          ?.lat
+                      }
 
-                        ,
+                      ,
 
-                        {" "}
+                      {" "}
 
-                        {
-                          ride
-                            .pickupLocation
-                            ?.lng
-                        }
-                      </p>
-
-                      <p>
-                        <strong>
-                          Destination:
-                        </strong>
-
-                        <br />
-
-                        {
-                          ride
-                            .destinationLocation
-                            ?.lat
-                        }
-
-                        ,
-
-                        {" "}
-
-                        {
-                          ride
-                            .destinationLocation
-                            ?.lng
-                        }
-                      </p>
-                    </div>
+                      {
+                        ride
+                          .destinationLocation
+                          ?.lng
+                      }
+                    </p>
 
                     <div
                       style={{
                         display:
                           "flex",
-
-                        flexDirection:
-                          isMobile
-                            ? "column"
-                            : "row",
-
                         gap: "10px",
                       }}
                     >
-                      {/* ACCEPT */}
                       <button
                         onClick={() =>
                           acceptRide(
@@ -637,33 +795,21 @@ function Dashboard() {
                         }
                         style={{
                           flex: 1,
-
                           padding:
                             "12px",
-
                           border:
                             "none",
-
                           borderRadius:
-                            "10px",
-
+                            "12px",
                           background:
                             "#16a34a",
-
                           color:
                             "white",
-
-                          fontWeight:
-                            "600",
-
-                          cursor:
-                            "pointer",
                         }}
                       >
                         Accept
                       </button>
 
-                      {/* REJECT */}
                       <button
                         onClick={() =>
                           rejectRide(
@@ -672,27 +818,16 @@ function Dashboard() {
                         }
                         style={{
                           flex: 1,
-
                           padding:
                             "12px",
-
                           border:
                             "none",
-
                           borderRadius:
-                            "10px",
-
+                            "12px",
                           background:
                             "#dc2626",
-
                           color:
                             "white",
-
-                          fontWeight:
-                            "600",
-
-                          cursor:
-                            "pointer",
                         }}
                       >
                         Reject
@@ -709,73 +844,21 @@ function Dashboard() {
                 style={{
                   background:
                     "white",
-
                   borderRadius:
-                    "20px",
-
+                    "24px",
                   padding:
-                    isMobile
-                      ? "18px"
-                      : "25px",
-
-                  boxShadow:
-                    "0 8px 25px rgba(0,0,0,0.05)",
+                    "25px",
                 }}
               >
-                <h2
-                  style={{
-                    marginBottom:
-                      "20px",
-                  }}
-                >
+                <h2>
                   Active Ride
                 </h2>
 
                 <p>
-                  <strong>
-                    Pickup:
-                  </strong>
-
-                  <br />
-
-                  {
-                    currentRide
-                      ?.pickupLocation
-                      ?.lat
-                  }
-
-                  ,
-
+                  Status:
                   {" "}
-
                   {
-                    currentRide
-                      ?.pickupLocation
-                      ?.lng
-                  }
-                </p>
-
-                <p>
-                  <strong>
-                    Destination:
-                  </strong>
-
-                  <br />
-
-                  {
-                    currentRide
-                      ?.destinationLocation
-                      ?.lat
-                  }
-
-                  ,
-
-                  {" "}
-
-                  {
-                    currentRide
-                      ?.destinationLocation
-                      ?.lng
+                    rideStatus
                   }
                 </p>
 
@@ -783,12 +866,9 @@ function Dashboard() {
                   style={{
                     display:
                       "flex",
-
                     flexDirection:
                       "column",
-
                     gap: "12px",
-
                     marginTop:
                       "20px",
                   }}
@@ -799,28 +879,6 @@ function Dashboard() {
                         "ARRIVING"
                       )
                     }
-                    style={{
-                      padding:
-                        "12px",
-
-                      border:
-                        "none",
-
-                      borderRadius:
-                        "10px",
-
-                      background:
-                        "#2563eb",
-
-                      color:
-                        "white",
-
-                      fontWeight:
-                        "600",
-
-                      cursor:
-                        "pointer",
-                    }}
                   >
                     Arriving
                   </button>
@@ -831,28 +889,6 @@ function Dashboard() {
                         "STARTED"
                       )
                     }
-                    style={{
-                      padding:
-                        "12px",
-
-                      border:
-                        "none",
-
-                      borderRadius:
-                        "10px",
-
-                      background:
-                        "#111827",
-
-                      color:
-                        "white",
-
-                      fontWeight:
-                        "600",
-
-                      cursor:
-                        "pointer",
-                    }}
                   >
                     Start Trip
                   </button>
@@ -863,28 +899,6 @@ function Dashboard() {
                         "COMPLETED"
                       )
                     }
-                    style={{
-                      padding:
-                        "12px",
-
-                      border:
-                        "none",
-
-                      borderRadius:
-                        "10px",
-
-                      background:
-                        "#16a34a",
-
-                      color:
-                        "white",
-
-                      fontWeight:
-                        "600",
-
-                      cursor:
-                        "pointer",
-                    }}
                   >
                     Complete Trip
                   </button>
@@ -896,21 +910,15 @@ function Dashboard() {
           {/* MAP */}
           <div
             style={{
-              background: "white",
-
-              borderRadius:
-                "20px",
-
-              overflow: "hidden",
-
               height: isMobile
-                ? "450px"
-                : "750px",
-
-              width: "100%",
-
-              boxShadow:
-                "0 8px 25px rgba(0,0,0,0.05)",
+                ? "500px"
+                : "820px",
+              borderRadius:
+                "24px",
+              overflow:
+                "hidden",
+              background:
+                "white",
             }}
           >
             <DriverMap

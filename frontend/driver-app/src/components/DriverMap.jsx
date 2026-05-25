@@ -3,13 +3,19 @@ import {
   TileLayer,
   Marker,
   Popup,
-  Polyline,
+  useMap,
   useMapEvents,
 } from "react-leaflet";
 
 import L from "leaflet";
 
+import { useEffect } from "react";
+
 import "leaflet/dist/leaflet.css";
+
+import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
+
+import "leaflet-routing-machine";
 
 // DRIVER ICON (BLUE)
 const driverIcon = new L.Icon({
@@ -19,9 +25,9 @@ const driverIcon = new L.Icon({
   shadowUrl:
     "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 
-  iconSize: [25, 41],
+  iconSize: [28, 45],
 
-  iconAnchor: [12, 41],
+  iconAnchor: [14, 45],
 });
 
 // CUSTOMER PICKUP ICON (GREEN)
@@ -33,9 +39,9 @@ const customerIcon =
     shadowUrl:
       "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 
-    iconSize: [25, 41],
+    iconSize: [28, 45],
 
-    iconAnchor: [12, 41],
+    iconAnchor: [14, 45],
   });
 
 // DESTINATION ICON (RED)
@@ -47,10 +53,76 @@ const destinationIcon =
     shadowUrl:
       "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 
-    iconSize: [25, 41],
+    iconSize: [28, 45],
 
-    iconAnchor: [12, 41],
+    iconAnchor: [14, 45],
   });
+
+// AUTO CENTER MAP
+function ChangeMapView({ center }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!center) return;
+
+    map.setView(center, 13, {
+      animate: true,
+    });
+  }, [center, map]);
+
+  return null;
+}
+
+// ROAD ROUTING
+function Routing({
+  from,
+  to,
+  color,
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!from || !to) return;
+
+    const routingControl =
+      L.Routing.control({
+        waypoints: [
+          L.latLng(from.lat, from.lng),
+          L.latLng(to.lat, to.lng),
+        ],
+
+        routeWhileDragging: false,
+
+        addWaypoints: false,
+
+        draggableWaypoints: false,
+
+        fitSelectedRoutes: false,
+
+        show: false,
+
+        createMarker: () => null,
+
+        lineOptions: {
+          styles: [
+            {
+              color,
+              weight: 6,
+              opacity: 0.85,
+            },
+          ],
+        },
+      }).addTo(map);
+
+    return () => {
+      map.removeControl(
+        routingControl
+      );
+    };
+  }, [from, to, map, color]);
+
+  return null;
+}
 
 // CLICK TO MOVE DRIVER
 function DriverLocationSelector({
@@ -64,7 +136,6 @@ function DriverLocationSelector({
       const lng =
         e.latlng.lng;
 
-      // FIXED
       setDriverLocation(
         lat,
         lng
@@ -83,10 +154,10 @@ function DriverMap({
 }) {
   const center =
     driverLocation ||
-    customerLocation || [
-      27.1,
-      93.6,
-    ];
+    customerLocation || {
+      lat: 27.1,
+      lng: 93.6,
+    };
 
   return (
     <div
@@ -105,6 +176,11 @@ function DriverMap({
           minHeight: "400px",
         }}
       >
+        <ChangeMapView
+          center={center}
+        />
+
+        {/* MAP TILE */}
         <TileLayer
           attribution="&copy; OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -131,7 +207,7 @@ function DriverMap({
           </Marker>
         )}
 
-        {/* CUSTOMER PICKUP */}
+        {/* CUSTOMER */}
         {customerLocation && (
           <Marker
             position={
@@ -145,7 +221,7 @@ function DriverMap({
           </Marker>
         )}
 
-        {/* CUSTOMER DESTINATION */}
+        {/* DESTINATION */}
         {destinationLocation && (
           <Marker
             position={
@@ -161,25 +237,31 @@ function DriverMap({
           </Marker>
         )}
 
-        {/* DRIVER TO CUSTOMER */}
+        {/* DRIVER → CUSTOMER ROAD */}
         {driverLocation &&
           customerLocation && (
-            <Polyline
-              positions={[
-                driverLocation,
-                customerLocation,
-              ]}
+            <Routing
+              from={
+                driverLocation
+              }
+              to={
+                customerLocation
+              }
+              color="#2563eb"
             />
           )}
 
-        {/* CUSTOMER TO DESTINATION */}
+        {/* CUSTOMER → DESTINATION ROAD */}
         {customerLocation &&
           destinationLocation && (
-            <Polyline
-              positions={[
-                customerLocation,
-                destinationLocation,
-              ]}
+            <Routing
+              from={
+                customerLocation
+              }
+              to={
+                destinationLocation
+              }
+              color="#16a34a"
             />
           )}
       </MapContainer>

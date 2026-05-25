@@ -2,14 +2,21 @@ import mongoose from "mongoose";
 
 const driverSchema = new mongoose.Schema(
   {
-    name: String,
+    name: {
+      type: String,
+      required: true,
+    },
 
     email: {
       type: String,
       unique: true,
+      required: true,
     },
 
-    password: String,
+    password: {
+      type: String,
+      required: true,
+    },
 
     isOnline: {
       type: Boolean,
@@ -17,8 +24,15 @@ const driverSchema = new mongoose.Schema(
     },
 
     currentLocation: {
-      lat: Number,
-      lng: Number,
+      lat: {
+        type: Number,
+        default: 0,
+      },
+
+      lng: {
+        type: Number,
+        default: 0,
+      },
     },
   },
   {
@@ -26,4 +40,7 @@ const driverSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model("Driver", driverSchema);
+export default mongoose.model(
+  "Driver",
+  driverSchema
+);

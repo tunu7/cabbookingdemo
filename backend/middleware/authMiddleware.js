@@ -1,26 +1,74 @@
 import jwt from "jsonwebtoken";
 
-export const protect = (req, res, next) => {
-  try {
-    const token = req.headers.authorization?.split(" ")[1];
+export const protect =
+  async (req, res, next) => {
 
-    if (!token) {
-      return res.status(401).json({
-        message: "No token",
-      });
+    try {
+
+      console.log(
+        "AUTH HEADERS:",
+        req.headers.authorization
+      );
+
+      const authHeader =
+        req.headers.authorization;
+
+      if (!authHeader) {
+
+        return res
+          .status(401)
+          .json({
+            message:
+              "No authorization header",
+          });
+      }
+
+      const token =
+        authHeader.split(" ")[1];
+
+      if (!token) {
+
+        return res
+          .status(401)
+          .json({
+            message:
+              "No token provided",
+          });
+      }
+
+      console.log(
+        "TOKEN:",
+        token
+      );
+
+      const decoded =
+        jwt.verify(
+          token,
+          process.env.JWT_SECRET
+        );
+
+      console.log(
+        "DECODED:",
+        decoded
+      );
+
+      req.user = decoded;
+
+      next();
+
+    } catch (error) {
+
+      console.log(
+        "AUTH ERROR:"
+      );
+
+      console.log(error);
+
+      return res
+        .status(401)
+        .json({
+          message:
+            "Unauthorized",
+        });
     }
-
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
-
-    req.user = decoded;
-
-    next();
-  } catch (error) {
-    res.status(401).json({
-      message: "Unauthorized",
-    });
-  }
-};
+  };
