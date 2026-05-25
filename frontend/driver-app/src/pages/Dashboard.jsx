@@ -480,466 +480,681 @@ function Dashboard() {
           )
         )
       : 0;
+return (
+  <div
+    style={{
+      minHeight: "100vh",
+      background: "#f5f7fb",
+    }}
+  >
+    <Navbar />
 
-  return (
     <div
       style={{
-        minHeight: "100vh",
-        background:
-          "#f3f6fb",
+        maxWidth: "1500px",
+        margin: "0 auto",
+        padding: isMobile ? "16px" : "28px",
       }}
     >
-      <Navbar />
-
+      {/* HEADER */}
       <div
         style={{
-          maxWidth: "1450px",
-          margin: "0 auto",
-          padding: isMobile
-            ? "15px"
-            : "30px 20px",
+          marginBottom: "28px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "20px",
         }}
       >
-        {/* HEADER */}
-        <div
-          style={{
-            marginBottom: "30px",
-            display: "flex",
-            justifyContent:
-              "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "15px",
-          }}
-        >
-          <div>
-            <h1
-              style={{
-                fontSize: isMobile
-                  ? "30px"
-                  : "42px",
-                fontWeight: "800",
-                color: "#111827",
-              }}
-            >
-              Driver Dashboard
-            </h1>
-
-            <p
-              style={{
-                color: "#6b7280",
-              }}
-            >
-              Live realtime ride
-              tracking.
-            </p>
-          </div>
-
-          {/* ONLINE BUTTON */}
-          <button
-            onClick={
-              toggleOnlineStatus
-            }
+        <div>
+          <p
             style={{
-              padding:
-                "15px 24px",
-              border: "none",
-              borderRadius:
-                "16px",
-              background:
-                online
-                  ? "#16a34a"
-                  : "#111827",
-              color: "white",
+              margin: 0,
+              fontSize: "13px",
               fontWeight: "700",
-              cursor: "pointer",
+              color: "#6b7280",
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
             }}
           >
-            {online
-              ? "Go Offline"
-              : "Go Online"}
-          </button>
+            Driver Panel
+          </p>
+
+          <h1
+            style={{
+              margin: "8px 0",
+              fontSize: isMobile
+                ? "34px"
+                : "46px",
+              fontWeight: "800",
+              color: "#111827",
+              lineHeight: 1.1,
+            }}
+          >
+            Driver Dashboard
+          </h1>
+
+          <p
+            style={{
+              margin: 0,
+              color: "#6b7280",
+              fontSize: "15px",
+            }}
+          >
+            Manage rides and track customers
+            live in realtime.
+          </p>
         </div>
 
-        {/* STATS */}
-        <div
+        {/* ONLINE BUTTON */}
+        <button
+          onClick={toggleOnlineStatus}
           style={{
-            display: "grid",
-            gridTemplateColumns:
-              isMobile
-                ? "1fr"
-                : "repeat(4,1fr)",
-            gap: "18px",
-            marginBottom: "25px",
+            padding: "16px 28px",
+            border: "none",
+            borderRadius: "18px",
+            background: online
+              ? "#16a34a"
+              : "#111827",
+            color: "#ffffff",
+            fontWeight: "700",
+            fontSize: "15px",
+            cursor: "pointer",
+            boxShadow: online
+              ? "0 10px 25px rgba(22,163,74,0.25)"
+              : "0 10px 25px rgba(17,24,39,0.18)",
+            transition: "0.25s",
           }}
         >
-          {/* STATUS */}
-          <div
+          {online
+            ? "Go Offline"
+            : "Go Online"}
+        </button>
+      </div>
+
+      {/* STATS */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: isMobile
+            ? "1fr"
+            : "repeat(4,1fr)",
+          gap: "18px",
+          marginBottom: "25px",
+        }}
+      >
+        {/* STATUS */}
+        <div
+          style={{
+            background: "#ffffff",
+            borderRadius: "24px",
+            padding: "24px",
+            border: "1px solid #e5e7eb",
+            boxShadow:
+              "0 8px 24px rgba(15,23,42,0.05)",
+          }}
+        >
+          <p
             style={{
-              background: "white",
-              padding: "22px",
-              borderRadius:
-                "22px",
+              margin: 0,
+              color: "#6b7280",
+              fontSize: "14px",
+              fontWeight: "600",
             }}
           >
-            <div>
-              Driver Status
-            </div>
+            Driver Status
+          </p>
 
-            <div
-              style={{
-                fontSize: "26px",
-                fontWeight: "800",
-                color:
-                  online
-                    ? "#16a34a"
-                    : "#dc2626",
-              }}
-            >
-              {rideStatus}
-            </div>
-          </div>
-
-          {/* ETA */}
-          <div
+          <h2
             style={{
-              background: "white",
-              padding: "22px",
-              borderRadius:
-                "22px",
+              margin: "12px 0 0",
+              fontSize: "30px",
+              fontWeight: "800",
+              color: online
+                ? "#16a34a"
+                : "#dc2626",
             }}
           >
-            <div>
-              ETA to Pickup
-            </div>
+            {rideStatus}
+          </h2>
+        </div>
 
-            <div
-              style={{
-                fontSize: "26px",
-                fontWeight: "800",
-              }}
-            >
-              {eta} min
-            </div>
-          </div>
-
-          {/* DISTANCE */}
-          <div
+        {/* ETA */}
+        <div
+          style={{
+            background: "#ffffff",
+            borderRadius: "24px",
+            padding: "24px",
+            border: "1px solid #e5e7eb",
+            boxShadow:
+              "0 8px 24px rgba(15,23,42,0.05)",
+          }}
+        >
+          <p
             style={{
-              background: "white",
-              padding: "22px",
-              borderRadius:
-                "22px",
+              margin: 0,
+              color: "#6b7280",
+              fontSize: "14px",
+              fontWeight: "600",
             }}
           >
-            <div>
-              Trip Distance
-            </div>
+            ETA to Pickup
+          </p>
 
-            <div
+          <h2
+            style={{
+              margin: "12px 0 0",
+              fontSize: "30px",
+              fontWeight: "800",
+              color: "#111827",
+            }}
+          >
+            {eta}
+            <span
               style={{
-                fontSize: "26px",
-                fontWeight: "800",
+                fontSize: "14px",
+                color: "#6b7280",
+                marginLeft: "5px",
               }}
             >
-              {(
-                tripDistance /
-                1000
-              ).toFixed(1)}{" "}
+              min
+            </span>
+          </h2>
+        </div>
+
+        {/* DISTANCE */}
+        <div
+          style={{
+            background: "#ffffff",
+            borderRadius: "24px",
+            padding: "24px",
+            border: "1px solid #e5e7eb",
+            boxShadow:
+              "0 8px 24px rgba(15,23,42,0.05)",
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              color: "#6b7280",
+              fontSize: "14px",
+              fontWeight: "600",
+            }}
+          >
+            Trip Distance
+          </p>
+
+          <h2
+            style={{
+              margin: "12px 0 0",
+              fontSize: "30px",
+              fontWeight: "800",
+              color: "#111827",
+            }}
+          >
+            {(
+              tripDistance / 1000
+            ).toFixed(1)}
+            <span
+              style={{
+                fontSize: "14px",
+                color: "#6b7280",
+                marginLeft: "5px",
+              }}
+            >
               km
-            </div>
-          </div>
-
-          {/* FARE */}
-          <div
-            style={{
-              background: "white",
-              padding: "22px",
-              borderRadius:
-                "22px",
-            }}
-          >
-            <div>
-              Estimated Fare
-            </div>
-
-            <div
-              style={{
-                fontSize: "26px",
-                fontWeight: "800",
-                color: "#16a34a",
-              }}
-            >
-              ₹
-              {
-                estimatedFare
-              }
-            </div>
-          </div>
+            </span>
+          </h2>
         </div>
 
-        {/* MAIN */}
+        {/* FARE */}
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns:
-              isMobile
-                ? "1fr"
-                : "420px 1fr",
-            gap: "25px",
+            background: "#111827",
+            borderRadius: "24px",
+            padding: "24px",
+            boxShadow:
+              "0 10px 25px rgba(17,24,39,0.15)",
           }}
         >
-          {/* LEFT */}
-          <div
+          <p
             style={{
-              display: "flex",
-              flexDirection:
-                "column",
-              gap: "25px",
+              margin: 0,
+              color: "rgba(255,255,255,0.7)",
+              fontSize: "14px",
+              fontWeight: "600",
             }}
           >
-            {/* PENDING RIDES */}
+            Estimated Fare
+          </p>
+
+          <h2
+            style={{
+              margin: "12px 0 0",
+              fontSize: "30px",
+              fontWeight: "800",
+              color: "#ffffff",
+            }}
+          >
+            ₹{estimatedFare}
+          </h2>
+        </div>
+      </div>
+
+      {/* MAIN */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: isMobile
+            ? "1fr"
+            : "420px 1fr",
+          gap: "24px",
+          alignItems: "start",
+        }}
+      >
+        {/* LEFT SIDEBAR */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "24px",
+          }}
+        >
+          {/* PENDING RIDES */}
+          <div
+            style={{
+              background: "rgba(255,255,255,0.92)",
+              backdropFilter: "blur(10px)",
+              borderRadius: "28px",
+              padding: "24px",
+              border: "1px solid #e5e7eb",
+              boxShadow:
+                "0 10px 30px rgba(15,23,42,0.06)",
+            }}
+          >
             <div
               style={{
-                background: "white",
-                borderRadius:
-                  "24px",
-                padding: "25px",
+                display: "flex",
+                justifyContent:
+                  "space-between",
+                alignItems: "center",
+                marginBottom: "20px",
               }}
             >
-              <h2>
-                Pending Rides (
-                {
-                  pendingRides.length
-                }
-                )
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: "24px",
+                  fontWeight: "800",
+                  color: "#111827",
+                }}
+              >
+                Pending Rides
               </h2>
 
-              {pendingRides.length ===
-                0 && (
-                <p>
-                  No Ride
-                  Requests
-                </p>
-              )}
+              <div
+                style={{
+                  background: "#111827",
+                  color: "#ffffff",
+                  borderRadius: "999px",
+                  padding: "6px 12px",
+                  fontSize: "13px",
+                  fontWeight: "700",
+                }}
+              >
+                {pendingRides.length}
+              </div>
+            </div>
 
-              {pendingRides.map(
-                (ride) => (
+            {pendingRides.length ===
+              0 && (
+              <div
+                style={{
+                  padding: "30px 20px",
+                  textAlign: "center",
+                  background: "#f9fafb",
+                  borderRadius: "18px",
+                  color: "#6b7280",
+                  fontWeight: "500",
+                }}
+              >
+                No ride requests available
+              </div>
+            )}
+
+            {pendingRides.map(
+              (ride) => (
+                <div
+                  key={ride._id}
+                  style={{
+                    border:
+                      "1px solid #e5e7eb",
+                    borderRadius:
+                      "22px",
+                    padding: "20px",
+                    marginBottom:
+                      "16px",
+                    background:
+                      "#ffffff",
+                  }}
+                >
                   <div
-                    key={
-                      ride._id
-                    }
                     style={{
-                      border:
-                        "1px solid #eee",
-                      borderRadius:
-                        "18px",
-                      padding:
-                        "18px",
-                      marginBottom:
-                        "15px",
+                      marginBottom: "16px",
                     }}
                   >
-                    <p>
-                      Pickup:
-                      {" "}
-                      {
-                        ride
-                          .pickupLocation
-                          ?.lat
-                      }
-
-                      ,
-
-                      {" "}
-
-                      {
-                        ride
-                          .pickupLocation
-                          ?.lng
-                      }
-                    </p>
-
-                    <p>
-                      Destination:
-                      {" "}
-                      {
-                        ride
-                          .destinationLocation
-                          ?.lat
-                      }
-
-                      ,
-
-                      {" "}
-
-                      {
-                        ride
-                          .destinationLocation
-                          ?.lng
-                      }
+                    <p
+                      style={{
+                        margin:
+                          "0 0 10px",
+                        fontSize:
+                          "14px",
+                        color:
+                          "#6b7280",
+                        fontWeight:
+                          "600",
+                      }}
+                    >
+                      Pickup
                     </p>
 
                     <div
                       style={{
-                        display:
-                          "flex",
-                        gap: "10px",
+                        fontWeight:
+                          "700",
+                        color:
+                          "#111827",
+                        fontSize:
+                          "15px",
                       }}
                     >
-                      <button
-                        onClick={() =>
-                          acceptRide(
-                            ride._id
-                          )
-                        }
-                        style={{
-                          flex: 1,
-                          padding:
-                            "12px",
-                          border:
-                            "none",
-                          borderRadius:
-                            "12px",
-                          background:
-                            "#16a34a",
-                          color:
-                            "white",
-                        }}
-                      >
-                        Accept
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          rejectRide(
-                            ride._id
-                          )
-                        }
-                        style={{
-                          flex: 1,
-                          padding:
-                            "12px",
-                          border:
-                            "none",
-                          borderRadius:
-                            "12px",
-                          background:
-                            "#dc2626",
-                          color:
-                            "white",
-                        }}
-                      >
-                        Reject
-                      </button>
+                      {
+                        ride
+                          .pickupLocation
+                          ?.lat
+                      }
+                      ,
+                      {" "}
+                      {
+                        ride
+                          .pickupLocation
+                          ?.lng
+                      }
                     </div>
                   </div>
-                )
-              )}
-            </div>
 
-            {/* ACTIVE RIDE */}
-            {currentRide && (
-              <div
-                style={{
-                  background:
-                    "white",
-                  borderRadius:
-                    "24px",
-                  padding:
-                    "25px",
-                }}
-              >
-                <h2>
-                  Active Ride
-                </h2>
-
-                <p>
-                  Status:
-                  {" "}
-                  {
-                    rideStatus
-                  }
-                </p>
-
-                <div
-                  style={{
-                    display:
-                      "flex",
-                    flexDirection:
-                      "column",
-                    gap: "12px",
-                    marginTop:
-                      "20px",
-                  }}
-                >
-                  <button
-                    onClick={() =>
-                      updateRideStatus(
-                        "ARRIVING"
-                      )
-                    }
+                  <div
+                    style={{
+                      marginBottom: "20px",
+                    }}
                   >
-                    Arriving
-                  </button>
+                    <p
+                      style={{
+                        margin:
+                          "0 0 10px",
+                        fontSize:
+                          "14px",
+                        color:
+                          "#6b7280",
+                        fontWeight:
+                          "600",
+                      }}
+                    >
+                      Destination
+                    </p>
 
-                  <button
-                    onClick={() =>
-                      updateRideStatus(
-                        "STARTED"
-                      )
-                    }
-                  >
-                    Start Trip
-                  </button>
+                    <div
+                      style={{
+                        fontWeight:
+                          "700",
+                        color:
+                          "#111827",
+                        fontSize:
+                          "15px",
+                      }}
+                    >
+                      {
+                        ride
+                          .destinationLocation
+                          ?.lat
+                      }
+                      ,
+                      {" "}
+                      {
+                        ride
+                          .destinationLocation
+                          ?.lng
+                      }
+                    </div>
+                  </div>
 
-                  <button
-                    onClick={() =>
-                      updateRideStatus(
-                        "COMPLETED"
-                      )
-                    }
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "12px",
+                    }}
                   >
-                    Complete Trip
-                  </button>
+                    <button
+                      onClick={() =>
+                        acceptRide(
+                          ride._id
+                        )
+                      }
+                      style={{
+                        flex: 1,
+                        padding:
+                          "14px",
+                        border: "none",
+                        borderRadius:
+                          "14px",
+                        background:
+                          "#16a34a",
+                        color:
+                          "#ffffff",
+                        fontWeight:
+                          "700",
+                        cursor:
+                          "pointer",
+                      }}
+                    >
+                      Accept
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        rejectRide(
+                          ride._id
+                        )
+                      }
+                      style={{
+                        flex: 1,
+                        padding:
+                          "14px",
+                        border: "none",
+                        borderRadius:
+                          "14px",
+                        background:
+                          "#dc2626",
+                        color:
+                          "#ffffff",
+                        fontWeight:
+                          "700",
+                        cursor:
+                          "pointer",
+                      }}
+                    >
+                      Reject
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )
             )}
           </div>
 
-          {/* MAP */}
-          <div
-            style={{
-              height: isMobile
-                ? "500px"
-                : "820px",
-              borderRadius:
-                "24px",
-              overflow:
-                "hidden",
-              background:
-                "white",
-            }}
-          >
-            <DriverMap
-              driverLocation={
-                driverLocation
-              }
-              customerLocation={
-                customerLocation
-              }
-              destinationLocation={
-                destinationLocation
-              }
-              setDriverLocation={
-                updateDriverLocation
-              }
-            />
-          </div>
+          {/* ACTIVE RIDE */}
+          {currentRide && (
+            <div
+              style={{
+                background:
+                  "rgba(255,255,255,0.92)",
+                backdropFilter:
+                  "blur(10px)",
+                borderRadius:
+                  "28px",
+                padding: "24px",
+                border:
+                  "1px solid #e5e7eb",
+                boxShadow:
+                  "0 10px 30px rgba(15,23,42,0.06)",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent:
+                    "space-between",
+                  alignItems: "center",
+                  marginBottom:
+                    "20px",
+                }}
+              >
+                <h2
+                  style={{
+                    margin: 0,
+                    fontSize: "24px",
+                    fontWeight: "800",
+                    color: "#111827",
+                  }}
+                >
+                  Active Ride
+                </h2>
+
+                <div
+                  style={{
+                    background:
+                      "#dcfce7",
+                    color: "#166534",
+                    padding:
+                      "6px 12px",
+                    borderRadius:
+                      "999px",
+                    fontSize: "12px",
+                    fontWeight: "700",
+                  }}
+                >
+                  {rideStatus}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection:
+                    "column",
+                  gap: "14px",
+                }}
+              >
+                <button
+                  onClick={() =>
+                    updateRideStatus(
+                      "ARRIVING"
+                    )
+                  }
+                  style={{
+                    padding: "15px",
+                    border: "none",
+                    borderRadius:
+                      "16px",
+                    background:
+                      "#111827",
+                    color: "#ffffff",
+                    fontWeight: "700",
+                    cursor: "pointer",
+                  }}
+                >
+                  Mark as Arriving
+                </button>
+
+                <button
+                  onClick={() =>
+                    updateRideStatus(
+                      "STARTED"
+                    )
+                  }
+                  style={{
+                    padding: "15px",
+                    border: "none",
+                    borderRadius:
+                      "16px",
+                    background:
+                      "#2563eb",
+                    color: "#ffffff",
+                    fontWeight: "700",
+                    cursor: "pointer",
+                  }}
+                >
+                  Start Trip
+                </button>
+
+                <button
+                  onClick={() =>
+                    updateRideStatus(
+                      "COMPLETED"
+                    )
+                  }
+                  style={{
+                    padding: "15px",
+                    border: "none",
+                    borderRadius:
+                      "16px",
+                    background:
+                      "#16a34a",
+                    color: "#ffffff",
+                    fontWeight: "700",
+                    cursor: "pointer",
+                  }}
+                >
+                  Complete Trip
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* MAP */}
+        <div
+          style={{
+            height: isMobile
+              ? "500px"
+              : "calc(100vh - 120px)",
+            minHeight: "500px",
+            borderRadius: "30px",
+            overflow: "hidden",
+            background: "#ffffff",
+            border: "1px solid #e5e7eb",
+            boxShadow:
+              "0 10px 30px rgba(15,23,42,0.08)",
+          }}
+        >
+          <DriverMap
+            driverLocation={
+              driverLocation
+            }
+            customerLocation={
+              customerLocation
+            }
+            destinationLocation={
+              destinationLocation
+            }
+            setDriverLocation={
+              updateDriverLocation
+            }
+          />
         </div>
       </div>
     </div>
-  );
-}
+  </div>
+); }
 
 export default Dashboard;

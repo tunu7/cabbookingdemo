@@ -450,229 +450,493 @@ function Dashboard() {
     };
 
   return (
+  <div
+    style={{
+      minHeight: "100vh",
+      background: "#f5f7fb",
+    }}
+  >
+    <Navbar />
+
     <div
       style={{
-        minHeight: "100vh",
-        background:
-          "#f3f6fb",
+        maxWidth: "1500px",
+        margin: "0 auto",
+        padding: isMobile ? "16px" : "28px",
       }}
     >
-      <Navbar />
-
       <div
         style={{
-          maxWidth: "1450px",
-          margin: "0 auto",
-          padding: isMobile
-            ? "15px"
-            : "30px 20px",
+          display: "grid",
+          gridTemplateColumns: isMobile
+            ? "1fr"
+            : "400px 1fr",
+          gap: "24px",
+          alignItems: "start",
         }}
       >
+        {/* LEFT PANEL */}
         <div
           style={{
-            display: "grid",
-
-            gridTemplateColumns:
-              isMobile
-                ? "1fr"
-                : "420px 1fr",
-
-            gap: "25px",
+            background: "rgba(255,255,255,0.9)",
+            backdropFilter: "blur(10px)",
+            border: "1px solid #e5e7eb",
+            borderRadius: "28px",
+            padding: isMobile ? "20px" : "28px",
+            boxShadow:
+              "0 10px 30px rgba(15,23,42,0.06)",
+            position: "sticky",
+            top: "20px",
           }}
         >
-          {/* LEFT PANEL */}
+          {/* HEADER */}
           <div
             style={{
-              background: "white",
-
-              padding: "25px",
-
-              borderRadius:
-                "24px",
+              marginBottom: "24px",
             }}
           >
-            <h2>
+            <p
+              style={{
+                margin: 0,
+                fontSize: "13px",
+                fontWeight: "600",
+                color: "#6b7280",
+                letterSpacing: "0.5px",
+                textTransform: "uppercase",
+              }}
+            >
+              Ride Dashboard
+            </p>
+
+            <h2
+              style={{
+                marginTop: "8px",
+                marginBottom: "8px",
+                fontSize: isMobile
+                  ? "28px"
+                  : "34px",
+                fontWeight: "800",
+                color: "#111827",
+                lineHeight: 1.1,
+              }}
+            >
               {ride
-                ? "Ride Booked"
-                : "Book Ride"}
+                ? "Your Ride is Active"
+                : "Book a Ride"}
             </h2>
 
-            <input
-              type="text"
-              value={pickup}
-              onChange={(e) =>
-                setPickup(
-                  e.target.value
-                )
-              }
-              placeholder="Pickup"
-              disabled={!!ride}
+            <p
               style={{
-                width: "100%",
-                padding: "15px",
-                marginBottom:
-                  "15px",
+                margin: 0,
+                color: "#6b7280",
+                fontSize: "15px",
+                lineHeight: 1.6,
               }}
-            />
+            >
+              Fast, reliable and live-tracked
+              rides in real time.
+            </p>
+          </div>
 
-            <input
-              type="text"
-              value={destination}
-              onChange={(e) =>
-                setDestination(
-                  e.target.value
-                )
-              }
-              placeholder="Destination"
-              disabled={!!ride}
-              style={{
-                width: "100%",
-                padding: "15px",
-                marginBottom:
-                  "15px",
-              }}
-            />
+          {/* INPUTS */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "16px",
+            }}
+          >
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "8px",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color: "#374151",
+                }}
+              >
+                Pickup Location
+              </label>
+
+              <input
+                type="text"
+                value={pickup}
+                onChange={(e) =>
+                  setPickup(
+                    e.target.value
+                  )
+                }
+                placeholder="Enter pickup location"
+                disabled={!!ride}
+                style={{
+                  width: "100%",
+                  padding: "16px",
+                  borderRadius: "16px",
+                  border:
+                    "1px solid #d1d5db",
+                  background: ride
+                    ? "#f3f4f6"
+                    : "#ffffff",
+                  fontSize: "15px",
+                  outline: "none",
+                  transition: "0.2s",
+                  boxSizing: "border-box",
+                }}
+              />
+            </div>
+
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "8px",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color: "#374151",
+                }}
+              >
+                Destination
+              </label>
+
+              <input
+                type="text"
+                value={destination}
+                onChange={(e) =>
+                  setDestination(
+                    e.target.value
+                  )
+                }
+                placeholder="Where do you want to go?"
+                disabled={!!ride}
+                style={{
+                  width: "100%",
+                  padding: "16px",
+                  borderRadius: "16px",
+                  border:
+                    "1px solid #d1d5db",
+                  background: ride
+                    ? "#f3f4f6"
+                    : "#ffffff",
+                  fontSize: "15px",
+                  outline: "none",
+                  transition: "0.2s",
+                  boxSizing: "border-box",
+                }}
+              />
+            </div>
 
             <button
-              onClick={
-                bookRide
-              }
+              onClick={bookRide}
               disabled={
-                bookingLoading ||
-                !!ride
+                bookingLoading || !!ride
               }
               style={{
                 width: "100%",
-
-                padding: "15px",
-
+                padding: "16px",
                 border: "none",
-
-                borderRadius:
-                  "12px",
-
-                background:
-                  ride
-                    ? "#16a34a"
-                    : "#111827",
-
-                color: "white",
-
-                fontWeight:
-                  "700",
+                borderRadius: "18px",
+                background: ride
+                  ? "#16a34a"
+                  : "#111827",
+                color: "#ffffff",
+                fontSize: "15px",
+                fontWeight: "700",
+                cursor:
+                  bookingLoading || ride
+                    ? "not-allowed"
+                    : "pointer",
+                transition: "0.25s",
+                boxShadow: ride
+                  ? "0 8px 20px rgba(22,163,74,0.25)"
+                  : "0 8px 20px rgba(17,24,39,0.18)",
               }}
             >
               {bookingLoading
-                ? "Booking..."
+                ? "Booking Ride..."
                 : ride
                 ? "Ride Booked"
                 : "Book Ride"}
             </button>
+          </div>
 
-            {/* STATS */}
+          {/* STATS */}
+          <div
+            style={{
+              marginTop: "30px",
+            }}
+          >
             <div
               style={{
-                marginTop: "25px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent:
+                  "space-between",
+                marginBottom: "18px",
               }}
             >
-              <h3>
+              <h3
+                style={{
+                  margin: 0,
+                  fontSize: "20px",
+                  fontWeight: "700",
+                  color: "#111827",
+                }}
+              >
                 Ride Stats
               </h3>
 
-              <p>
-                Status:
-                {" "}
-                <strong>
-                  {ride?.status ||
-                    "WAITING"}
-                </strong>
-              </p>
+              <div
+                style={{
+                  padding:
+                    "6px 12px",
+                  borderRadius:
+                    "999px",
+                  background:
+                    ride?.status ===
+                    "ACCEPTED"
+                      ? "#dcfce7"
+                      : "#f3f4f6",
+                  color:
+                    ride?.status ===
+                    "ACCEPTED"
+                      ? "#166534"
+                      : "#374151",
+                  fontSize: "12px",
+                  fontWeight: "700",
+                }}
+              >
+                {ride?.status ||
+                  "WAITING"}
+              </div>
+            </div>
 
-              <p>
-                ETA:
-                {" "}
-                <strong>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "1fr 1fr",
+                gap: "14px",
+              }}
+            >
+              {/* ETA */}
+              <div
+                style={{
+                  background:
+                    "#ffffff",
+                  border:
+                    "1px solid #e5e7eb",
+                  borderRadius:
+                    "20px",
+                  padding: "18px",
+                }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    color: "#6b7280",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                  }}
+                >
+                  ETA
+                </p>
+
+                <h2
+                  style={{
+                    margin:
+                      "10px 0 0",
+                    fontSize: "28px",
+                    color: "#111827",
+                  }}
+                >
                   {eta}
-                  {" "}
-                  min
-                </strong>
-              </p>
+                  <span
+                    style={{
+                      fontSize:
+                        "14px",
+                      color:
+                        "#6b7280",
+                      marginLeft:
+                        "4px",
+                    }}
+                  >
+                    min
+                  </span>
+                </h2>
+              </div>
 
-              <p>
-                Driver Distance:
-                {" "}
-                <strong>
-                  {
-                    driverDistance
-                  }
-                  {" "}
-                  m
-                </strong>
-              </p>
+              {/* DRIVER DISTANCE */}
+              <div
+                style={{
+                  background:
+                    "#ffffff",
+                  border:
+                    "1px solid #e5e7eb",
+                  borderRadius:
+                    "20px",
+                  padding: "18px",
+                }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    color: "#6b7280",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                  }}
+                >
+                  Driver Distance
+                </p>
 
-              <p>
-                Trip Distance:
-                {" "}
-                <strong>
+                <h2
+                  style={{
+                    margin:
+                      "10px 0 0",
+                    fontSize: "28px",
+                    color: "#111827",
+                  }}
+                >
+                  {driverDistance}
+                  <span
+                    style={{
+                      fontSize:
+                        "14px",
+                      color:
+                        "#6b7280",
+                      marginLeft:
+                        "4px",
+                    }}
+                  >
+                    m
+                  </span>
+                </h2>
+              </div>
+
+              {/* TRIP DISTANCE */}
+              <div
+                style={{
+                  background:
+                    "#ffffff",
+                  border:
+                    "1px solid #e5e7eb",
+                  borderRadius:
+                    "20px",
+                  padding: "18px",
+                }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    color: "#6b7280",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                  }}
+                >
+                  Trip Distance
+                </p>
+
+                <h2
+                  style={{
+                    margin:
+                      "10px 0 0",
+                    fontSize: "28px",
+                    color: "#111827",
+                  }}
+                >
                   {(
                     tripDistance /
                     1000
-                  ).toFixed(2)}
-                  {" "}
-                  km
-                </strong>
-              </p>
+                  ).toFixed(1)}
+                  <span
+                    style={{
+                      fontSize:
+                        "14px",
+                      color:
+                        "#6b7280",
+                      marginLeft:
+                        "4px",
+                    }}
+                  >
+                    km
+                  </span>
+                </h2>
+              </div>
 
-              <p>
-                Fare:
-                {" "}
-                <strong>
-                  ₹
-                  {
-                    estimatedFare
-                  }
-                </strong>
-              </p>
+              {/* FARE */}
+              <div
+                style={{
+                  background:
+                    "#111827",
+                  color: "#ffffff",
+                  borderRadius:
+                    "20px",
+                  padding: "18px",
+                }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    color:
+                      "rgba(255,255,255,0.7)",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                  }}
+                >
+                  Estimated Fare
+                </p>
 
+                <h2
+                  style={{
+                    margin:
+                      "10px 0 0",
+                    fontSize: "28px",
+                    color: "#ffffff",
+                  }}
+                >
+                  ₹{estimatedFare}
+                </h2>
+              </div>
             </div>
           </div>
+        </div>
 
-          {/* MAP */}
-          <div
-            style={{
-              height: isMobile
-                ? "500px"
-                : "820px",
-
-              borderRadius:
-                "24px",
-
-              overflow:
-                "hidden",
-            }}
-          >
-            <RideMap
-              customerLocation={
-                pickupLocation
-              }
-              destinationLocation={
-                destinationLocation
-              }
-              setDestinationLocation={
-                setDestinationLocation
-              }
-              setDestination={
-                setDestination
-              }
-              driverLocation={
-                driverLocation
-              }
-            />
-          </div>
+        {/* MAP */}
+        <div
+          style={{
+            height: isMobile
+              ? "500px"
+              : "calc(100vh - 120px)",
+            minHeight: "500px",
+            borderRadius: "30px",
+            overflow: "hidden",
+            border: "1px solid #e5e7eb",
+            boxShadow:
+              "0 10px 30px rgba(15,23,42,0.08)",
+            background: "#ffffff",
+          }}
+        >
+          <RideMap
+            customerLocation={
+              pickupLocation
+            }
+            destinationLocation={
+              destinationLocation
+            }
+            setDestinationLocation={
+              setDestinationLocation
+            }
+            setDestination={
+              setDestination
+            }
+            driverLocation={
+              driverLocation
+            }
+          />
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }
-
 export default Dashboard;
